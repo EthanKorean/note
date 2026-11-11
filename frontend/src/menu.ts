@@ -18,4 +18,8 @@ export const menu: MenuGroup[] = [
     title: 'DB',
     items: [{ path: '/bulk-insert', label: '대용량 적재', desc: '도로명주소 642만 건 INSERT 비교' }],
   },
+  {
+    title: '게임',
+    items: [{ path: '/suika', label: '수박 게임', desc: '원을 합쳐 수박 만들기' }],
+  },
 ]
