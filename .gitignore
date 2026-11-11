@@ -1,0 +1,32 @@
+# Backend
+backend/.gradle/
+backend/build/
+backend/*/build/
+backend/out/
+hs_err_pid*.log
+
+# Frontend
+frontend/node_modules/
+frontend/dist/
+
+# 로그 / 임시
+*.log
+nohup.out
+
+# IDE / OS
+.idea/
+*.iml
+.vscode/
+.DS_Store
+
+# Secrets
+.env
+.env.*
+!.env.example
+
+# 대용량 생성 데이터 / 로컬 환경 값
+generate-data/result/*
+!generate-data/result/.gitkeep
+generate-data/.work_*/
+docker/**/.env
+!.env.example
