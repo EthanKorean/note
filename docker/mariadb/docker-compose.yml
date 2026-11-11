@@ -1,0 +1,33 @@
+name: note-mariadb
+
+services:
+  mariadb:
+    image: mariadb:11.4
+    container_name: note-mariadb
+    restart: unless-stopped
+    ports:
+      - "${MARIADB_PORT:?루트의 .env 가 필요합니다 (scripts/init-env.sh)}:3306"
+    environment:
+      MARIADB_ROOT_PASSWORD: ${MARIADB_ROOT_PASSWORD:?루트의 .env 에 MARIADB_ROOT_PASSWORD 를 채우세요}
+      MARIADB_DATABASE: ${MARIADB_DATABASE:-juso}
+      MARIADB_USER: ${MARIADB_USER:-note}
+      MARIADB_PASSWORD: ${MARIADB_PASSWORD:?루트의 .env 에 MARIADB_PASSWORD 를 채우세요}
+      TZ: Asia/Seoul
+    command:
+      - --character-set-server=utf8mb4
+      - --collation-server=utf8mb4_unicode_ci
+      - --local-infile=1          # LOAD DATA LOCAL INFILE 허용 (대용량 적재 테스트용)
+    volumes:
+      - mariadb-data:/var/lib/mysql
+      # 최초 기동 시 initdb/*.sql 을 자동 실행 (schema.sql)
+      - ./initdb:/docker-entrypoint-initdb.d:ro
+      # 생성한 주소 데이터를 컨테이너 안에서 /import 로 읽을 수 있게 마운트
+      - ../../generate-data/result:/import:ro
+    healthcheck:
+      test: ["CMD", "healthcheck.sh", "--connect", "--innodb_initialized"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+
+volumes:
+  mariadb-data:
