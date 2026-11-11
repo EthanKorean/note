@@ -73,6 +73,7 @@ scripts/run-frontend.sh
 
 - 적재할 방식을 체크해 순서대로 실행하고, 진행 메시지는 우측 하단 웹소켓 아이콘에서 볼 수 있습니다.
 - 적재 방식 비교와 노하우: [docs/bulk-insert.md](docs/bulk-insert.md)
+- 수박 게임(Canvas + 직접 구현한 2D 물리) 만든 과정: [docs/suika-game.md](docs/suika-game.md)
 
 ## 인프라 컨테이너
 
