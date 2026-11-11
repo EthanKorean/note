@@ -31,6 +31,9 @@
   --fruit-9: #9ad05a;
   --fruit-10: #4fae5a;
   --fruit-11: #2f8f4e;
+  --game-overlay: rgba(0, 0, 0, 0.55);
+  --game-overlay-text: #ffffff;
+  --ball-shine: rgba(255, 255, 255, 0.28);
   color-scheme: light dark;
   font-family: system-ui, -apple-system, 'Segoe UI', 'Noto Sans KR', sans-serif;
   line-height: 1.5;
@@ -70,6 +73,9 @@
     --fruit-9: #b4e57a;
     --fruit-10: #6fcf7a;
     --fruit-11: #4fb870;
+    --game-overlay: rgba(0, 0, 0, 0.6);
+    --game-overlay-text: #ffffff;
+    --ball-shine: rgba(255, 255, 255, 0.34);
   }
 }
 
