@@ -1,0 +1,24 @@
+server:
+  port: 9203
+
+spring:
+  application:
+    name: gateway
+  cloud:
+    gateway:
+      routes:
+        # /api/juso/** 요청을 juso-service(9204)로 전달
+        - id: juso-service
+          uri: http://localhost:9204
+          predicates:
+            - Path=/api/juso/**
+        # 범용 테스트 결과 API (현재는 juso-service가 제공)
+        - id: test-results
+          uri: http://localhost:9204
+          predicates:
+            - Path=/api/test-results/**
+        # STOMP 웹소켓(적재 진행 알림). ws:// 로 지정하면 gateway 가 업그레이드 요청을 그대로 중계한다.
+        - id: juso-ws
+          uri: ws://localhost:9204
+          predicates:
+            - Path=/ws-juso/**

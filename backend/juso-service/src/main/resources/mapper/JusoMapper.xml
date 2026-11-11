@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<!-- 컬럼 23개를 XML에 직접 적는다(JDBC 방식은 JusoColumns 가 만들어 준다). 순서는 JusoColumns.NAMES 와 같아야 한다. -->
+<mapper namespace="com.ethan.note.juso.mybatis.JusoMapper">
+
+    <sql id="cols">mng_no, bjd_code, sido_nm, sigungu_nm, emd_nm, ri_nm, san_yn, jibun_main, jibun_sub, road_code, road_nm, basement_yn, bld_main, bld_sub, hjd_code, hjd_nm, zip_code, prev_road_addr, effective_date, apt_type, move_reason, bld_nm, bld_nm_sigungu</sql>
+
+    <!-- mybatis-batch: 행 1건 INSERT. ExecutorType.BATCH 세션에서 호출하면 JDBC 배치로 묶인다. -->
+    <insert id="insertOne">
+        INSERT INTO ${table} (<include refid="cols"/>)
+        VALUES (#{row[0]}, #{row[1]}, #{row[2]}, #{row[3]}, #{row[4]}, #{row[5]}, #{row[6]}, #{row[7]}, #{row[8]}, #{row[9]}, #{row[10]}, #{row[11]}, #{row[12]}, #{row[13]}, #{row[14]}, #{row[15]}, #{row[16]}, #{row[17]}, #{row[18]}, #{row[19]}, #{row[20]}, #{row[21]}, #{row[22]})
+    </insert>
+
+    <!-- mybatis-foreach: &lt;foreach&gt; 로 VALUES 를 여러 행으로 펼친다(멀티 로우 INSERT).
+         foreach 안에서는 #{r[0]} 같은 배열 인덱스가 안 먹어서 행을 Map(컬럼명 → 값)으로 넘긴다. -->
+    <insert id="insertMulti">
+        INSERT INTO ${table} (<include refid="cols"/>) VALUES
+        <foreach collection="rows" item="r" separator=",">
+            (#{r.mng_no}, #{r.bjd_code}, #{r.sido_nm}, #{r.sigungu_nm}, #{r.emd_nm}, #{r.ri_nm}, #{r.san_yn}, #{r.jibun_main}, #{r.jibun_sub}, #{r.road_code}, #{r.road_nm}, #{r.basement_yn}, #{r.bld_main}, #{r.bld_sub}, #{r.hjd_code}, #{r.hjd_nm}, #{r.zip_code}, #{r.prev_road_addr}, #{r.effective_date}, #{r.apt_type}, #{r.move_reason}, #{r.bld_nm}, #{r.bld_nm_sigungu})
+        </foreach>
+    </insert>
+</mapper>
