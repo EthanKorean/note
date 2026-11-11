@@ -355,3 +355,4 @@ button.busy { display: inline-flex; align-items: center; justify-content: center
 /* 체크박스: 눈에 잘 띄고 누르기 쉽게 크게 */
 .radio input[type='checkbox'], .foot-checks input[type='checkbox'] { width: 20px; height: 20px; flex: none; cursor: pointer; accent-color: var(--accent); }
 .radio.all { padding-top: 10px; padding-bottom: 10px; }
+.lead { margin: 4px 0 6px; font-size: 1.05rem; font-weight: 600; }
