@@ -24,6 +24,9 @@ export const menu: MenuGroup[] = [
   },
   {
     title: '게임',
-    items: [{ path: '/suika', label: '수박 게임', desc: '원을 합쳐 수박 만들기' }],
+    items: [
+      { path: '/suika', label: '수박 게임', desc: '원을 합쳐 수박 만들기' },
+      { path: '/catch', label: '캐치마인드', desc: '그림을 그리고 제시어를 맞히는 멀티플레이' },
+    ],
   },
 ]

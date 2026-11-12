@@ -34,6 +34,14 @@
   --game-overlay: rgba(0, 0, 0, 0.55);
   --game-overlay-text: #ffffff;
   --ball-shine: rgba(255, 255, 255, 0.28);
+  --draw-1: #1c2330;
+  --draw-2: #e03e3e;
+  --draw-3: #f08a4b;
+  --draw-4: #f2b632;
+  --draw-5: #4fae5a;
+  --draw-6: #2f6fed;
+  --draw-7: #8e5bd6;
+  --draw-8: #8b5a3c;
   color-scheme: light dark;
   font-family: system-ui, -apple-system, 'Segoe UI', 'Noto Sans KR', sans-serif;
   line-height: 1.5;
@@ -76,6 +84,14 @@
     --game-overlay: rgba(0, 0, 0, 0.6);
     --game-overlay-text: #ffffff;
     --ball-shine: rgba(255, 255, 255, 0.34);
+    --draw-1: #e6e9ef;
+    --draw-2: #ff7a7a;
+    --draw-3: #ffa36b;
+    --draw-4: #ffd05a;
+    --draw-5: #6fcf7a;
+    --draw-6: #7fb0ff;
+    --draw-7: #c9a0ff;
+    --draw-8: #c79a7a;
   }
 }
 
