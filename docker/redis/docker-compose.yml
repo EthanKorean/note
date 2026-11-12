@@ -1,0 +1,29 @@
+name: note-redis
+
+services:
+  redis:
+    image: redis:7-alpine
+    container_name: note-redis
+    restart: unless-stopped
+    ports:
+      - "127.0.0.1:${REDIS_PORT:?루트의 .env 에 REDIS_PORT 가 필요합니다}:6379"
+    # 캐시 실험용: 디스크 저장 끔, 메모리 한도와 제거 정책은 실험 화면에서 CONFIG SET 으로 바꾼다.
+    command:
+      - redis-server
+      - --requirepass
+      - ${REDIS_PASSWORD:?루트의 .env 에 REDIS_PASSWORD 를 채우세요}
+      - --save
+      - ""
+      - --appendonly
+      - "no"
+      - --maxmemory
+      - 256mb
+      - --maxmemory-policy
+      - allkeys-lfu
+    healthcheck:
+      test: ["CMD-SHELL", "redis-cli -a \"$$REDIS_PASSWORD\" ping | grep PONG || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+    environment:
+      REDIS_PASSWORD: ${REDIS_PASSWORD}

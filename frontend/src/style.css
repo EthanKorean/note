@@ -356,3 +356,13 @@ button.busy { display: inline-flex; align-items: center; justify-content: center
 .radio input[type='checkbox'], .foot-checks input[type='checkbox'] { width: 20px; height: 20px; flex: none; cursor: pointer; accent-color: var(--accent); }
 .radio.all { padding-top: 10px; padding-bottom: 10px; }
 .lead { margin: 4px 0 6px; font-size: 1.05rem; font-weight: 600; }
+.spark { width: 120px; height: 28px; display: block; }
+.spark-base { stroke: var(--border); stroke-width: 1; }
+.spark-line { fill: none; stroke: var(--accent); stroke-width: 1.8; stroke-linejoin: round; stroke-linecap: round; }
+.foot-h { margin: 14px 0 6px; font-size: 0.85rem; }
+.foot-h:first-child { margin-top: 0; }
+.foot-run { display: flex; justify-content: flex-end; margin-top: 16px; }
+.foot-field select { width: 100%; box-sizing: border-box; }
+.warn-text { color: var(--warn-text); }
+.cond.wrap { white-space: normal; min-width: 220px; max-width: 300px; line-height: 1.4; }
+.group-row td { background: var(--bg); color: var(--muted); font-size: 0.82rem; padding-top: 0.6rem; border-bottom: 1px solid var(--border); }

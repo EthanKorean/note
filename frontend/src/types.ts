@@ -61,3 +61,70 @@ export interface TableInfo {
   dataMb: number
   indexMb: number
 }
+
+/** 이미지 캐시 실험 조건 (백엔드 BenchParams) */
+export interface ImageBenchParams {
+  mode: 'nocache' | 'prebuilt' | 'redis'
+  requests: number
+  threads: number
+  products: number
+  hotSetSize: number
+  hotRatio: number
+  rotateEvery: number
+  originLatencyMs: number
+  ttlSec: number
+  hotThreshold: number
+  windowSec: number
+  stampedeGuard: boolean
+  maxMemoryMb: number
+  evictionPolicy: string
+  resetCache: boolean
+}
+
+/** 이미지 캐시 실험 결과 (백엔드 BenchResult) */
+export interface ImageBenchResult {
+  params: ImageBenchParams
+  elapsedMs: number
+  throughput: number
+  avgMs: number
+  p50Ms: number
+  p95Ms: number
+  p99Ms: number
+  hitRatio: number
+  originReads: number
+  bytesServed: number
+  evictedKeys: number
+  redisUsedMb: number
+  timelineHit: number[]
+  timelineLatency: number[]
+}
+
+export interface ImageStatus {
+  count: number
+  dir: string
+  running: boolean
+  bytesBySize: Record<string, number>
+}
+
+export interface ImageRun extends ImageBenchResult {
+  id: string
+}
+
+export type ReplaceStrategy = 'none' | 'purge' | 'version'
+
+export interface ReplaceResult {
+  strategy: ReplaceStrategy
+  items: number
+  requests: number
+  stale: number
+  stalePct: number
+  invalidateMs: number
+  keysDeleted: number
+  keysInRedis: number
+  orphanKeys: number
+  ttlSec: number
+}
+
+export interface ReplaceRun extends ReplaceResult {
+  id: string
+}

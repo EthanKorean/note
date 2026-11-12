@@ -1,6 +1,7 @@
 import { createRouter, createWebHashHistory } from 'vue-router'
 import HomeView from './views/HomeView.vue'
 import BulkInsertView from './views/BulkInsertView.vue'
+import ImageCacheView from './views/ImageCacheView.vue'
 import SuikaView from './views/SuikaView.vue'
 
 export const router = createRouter({
@@ -8,6 +9,7 @@ export const router = createRouter({
   routes: [
     { path: '/', component: HomeView, meta: { title: '홈' } },
     { path: '/bulk-insert', component: BulkInsertView, meta: { title: '대용량 적재' } },
+    { path: '/image-cache', component: ImageCacheView, meta: { title: '이미지 캐싱' } },
     { path: '/suika', component: SuikaView, meta: { title: '수박 게임' } },
     { path: '/:pathMatch(.*)*', redirect: '/' },
   ],

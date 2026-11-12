@@ -12,6 +12,11 @@ spring:
           uri: http://localhost:9204
           predicates:
             - Path=/api/juso/**
+        # /api/image/** 요청을 image-service(9205)로 전달
+        - id: image-service
+          uri: http://localhost:9205
+          predicates:
+            - Path=/api/image/**
         # 범용 테스트 결과 API (현재는 juso-service가 제공)
         - id: test-results
           uri: http://localhost:9204
@@ -22,3 +27,8 @@ spring:
           uri: ws://localhost:9204
           predicates:
             - Path=/ws-juso/**
+        # 이미지 캐시 실험 진행 알림(STOMP)
+        - id: image-ws
+          uri: ws://localhost:9205
+          predicates:
+            - Path=/ws-image/**

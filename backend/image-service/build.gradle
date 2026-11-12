@@ -1,0 +1,7 @@
+dependencies {
+    implementation 'org.springframework.boot:spring-boot-starter-web'
+    implementation 'org.springframework.boot:spring-boot-starter-websocket'   // 진행 메시지(STOMP)
+    implementation 'org.springframework.boot:spring-boot-starter-data-redis'   // Lettuce 클라이언트
+    implementation 'org.springframework.boot:spring-boot-starter-jdbc'         // 결과를 test_result 에 저장
+    runtimeOnly 'org.mariadb.jdbc:mariadb-java-client'
+}

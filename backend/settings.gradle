@@ -2,3 +2,4 @@ rootProject.name = 'note-backend'
 
 include 'gateway'
 include 'juso-service'
+include 'image-service'

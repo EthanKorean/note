@@ -19,13 +19,23 @@ if [[ ! -f "$ENV_FILE" ]]; then
   echo "루트에 .env 가 없습니다. 먼저 scripts/init-env.sh 를 실행하고 비밀번호를 채우세요." >&2
   exit 1
 fi
-# compose 가 비밀번호 없이 뜨지 않도록 미리 확인한다.
-for v in MARIADB_ROOT_PASSWORD MARIADB_PASSWORD; do
-  if ! grep -Eq "^${v}=.+" "$ENV_FILE"; then
-    echo ".env 의 $v 값이 비어 있습니다. 채운 뒤 다시 실행하세요." >&2
-    exit 1
-  fi
-done
+# compose 가 비밀번호 없이 뜨지 않도록 서비스별로 필요한 값을 미리 확인한다.
+required_env() { # required_env <서비스>
+  case "$1" in
+    mariadb) echo "MARIADB_ROOT_PASSWORD MARIADB_PASSWORD" ;;
+    redis)   echo "REDIS_PORT REDIS_PASSWORD" ;;
+    *)       echo "" ;;
+  esac
+}
+check_env() { # check_env <서비스>
+  local v
+  for v in $(required_env "$1"); do
+    if ! grep -Eq "^${v}=.+" "$ENV_FILE"; then
+      echo ".env 의 $v 값이 비어 있습니다. 채운 뒤 다시 실행하세요." >&2
+      exit 1
+    fi
+  done
+}
 
 # podman 에뮬레이션 환경: 기본 소켓(/var/run/docker.sock)은 root 전용이라
 # 사용자용 소켓이 있으면 그걸 쓴다.
@@ -46,13 +56,20 @@ usage() { sed -n '2,13p' "$0" | sed 's/^# \{0,1\}//'; exit "${1:-1}"; }
 
 compose() { # compose <서비스> <인자...>
   local svc="$1"; shift
+  # up 이외(down/logs/ps 등)는 비밀번호가 필요 없다. compose 의 필수값 검사에 걸리지 않게 빈 값만 임시로 채운다.
+  if [[ "${1:-}" != "up" ]]; then
+    local v
+    for v in $(required_env "$svc"); do
+      grep -Eq "^${v}=.+" "$ENV_FILE" || { [[ "$v" == *PORT ]] && export "$v=0" || export "$v=unused"; }
+    done
+  fi
   [[ -f "$svc/docker-compose.yml" ]] || { echo "알 수 없는 서비스: $svc (사용 가능: $(services | xargs))" >&2; exit 1; }
   (cd "$svc" && "${COMPOSE[@]}" --env-file "$ENV_FILE" "$@")
 }
 
 cmd="${1:-}"; svc="${2:-}"
 case "$cmd" in
-  up)      [[ -n "$svc" ]] || usage; compose "$svc" up -d ;;
+  up)      [[ -n "$svc" ]] || usage; check_env "$svc"; compose "$svc" up -d ;;
   down)    [[ -n "$svc" ]] || usage; compose "$svc" down ;;
   destroy)
     [[ -n "$svc" ]] || usage

@@ -30,3 +30,6 @@ generate-data/result/*
 generate-data/.work_*/
 docker/**/.env
 !.env.example
+
+# 생성한 상품 이미지(재생성 가능)
+image-data/

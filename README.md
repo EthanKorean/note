@@ -10,10 +10,11 @@ note/
 ├── .env.example     환경변수 견본 (복사해서 .env 를 만든다. .env 는 커밋되지 않음)
 ├── backend/         Gradle 멀티 프로젝트 (MSA, Spring Boot 3.2 / Java 17)
 │   ├── gateway/         Spring Cloud Gateway (9203) — 모든 요청의 진입점
-│   └── juso-service/    도로명주소 대용량 적재 API + STOMP 웹소켓 (9204)
+│   ├── juso-service/    도로명주소 대용량 적재 API + STOMP 웹소켓 (9204)
+│   └── image-service/   이미지 캐싱 실험 API (9205, Redis)
 ├── frontend/        Vue 3 + TypeScript + Pinia (Vite, 9201) — 좌측 메뉴 + 대용량 적재 화면
 ├── generate-data/   대용량 테스트 데이터 생성 (도로명주소 → result/202610_juso.txt)
-├── docker/          인프라 컨테이너 모음 (mariadb, 이후 mqtt/kafka 등) + manage.sh
+├── docker/          인프라 컨테이너 모음 (mariadb, redis, 이후 mqtt/kafka 등) + manage.sh
 ├── scripts/         .env 만들기, 백엔드/프론트 실행 스크립트
 └── docs/            스터디 노트 (주제별 정리)
 ```
@@ -22,7 +23,7 @@ note/
 
 | 영역 | 사용 기술 |
 |---|---|
-| Backend | Java 17, Spring Boot 3.2.4, Spring Cloud Gateway, JDBC / MyBatis / Spring Data JPA, STOMP(WebSocket), MariaDB 11.4 |
+| Backend | Java 17, Spring Boot 3.2.4, Spring Cloud Gateway, JDBC / MyBatis / Spring Data JPA, STOMP(WebSocket), Spring Data Redis(Lettuce), MariaDB 11.4, Redis 7 |
 | Frontend | Vue 3, TypeScript, Pinia, vue-router, highlight.js, Vite 5 |
 | Build | Gradle (wrapper 포함), npm |
 
@@ -35,6 +36,7 @@ note/
 | `.env` | 프로젝트 **루트** (`note/.env`) | `scripts/init-env.sh` 로 `.env.example` 을 복사한 뒤 비밀번호 채움 | 커밋 금지(`.gitignore`). DB 계정/비밀번호, JDK 위치, 데이터 파일 경로 |
 | `202610_juso.txt` | `generate-data/result/` | `python3 generate-data/generate_juso.py` | 964MB, 커밋 금지. DB 컨테이너가 `/import` 로 같은 폴더를 읽는다 |
 | MariaDB 데이터 | 컨테이너 볼륨 `mariadb-data` | `docker/manage.sh up mariadb` | 최초 기동 시 `docker/mariadb/initdb/01-schema.sql` 자동 적용 |
+| 상품 이미지 | 프로젝트 루트 `image-data/` | 이미지 캐싱 화면의 "이미지 만들기" 버튼 | 커밋 금지, 재생성 가능(1,000개 약 10초, 76MB) |
 
 `.env` 에 들어가는 값(자세한 설명은 `.env.example`):
 
@@ -44,6 +46,9 @@ note/
 | `MARIADB_ROOT_PASSWORD`, `MARIADB_PASSWORD` | DB 컨테이너 비밀번호 — **반드시 채운다** |
 | `JUSO_DB_URL`, `JUSO_DB_USER`, `JUSO_DB_PASSWORD` | juso-service 가 접속할 DB. 비밀번호는 `MARIADB_ROOT_PASSWORD` 와 같은 값 |
 | `JUSO_DATA_FILE` | 적재할 원본 파일(절대 경로). 비우면 `generate-data/result/202610_juso.txt` |
+| `REDIS_PORT`, `REDIS_PASSWORD` | Redis 컨테이너와 image-service 접속 정보 (기본 포트 9001) — 비밀번호는 **반드시 채운다** |
+| `IMAGE_DIR` | 상품 이미지 폴더(절대 경로). 비우면 `image-data/` |
+| `IMAGE_SAMPLE_URL`, `IMAGE_SAMPLE_THREADS` | (선택) "샘플 사진 받기" 주소 템플릿과 동시 다운로드 수. 기본은 picsum.photos, 8개 |
 | `JAVA_HOME` | `java` 가 PATH 에 없을 때 JDK 17 위치 |
 
 코드와 설정 파일(`application.yml`, `docker-compose.yml`)에는 비밀번호를 적지 않습니다. 비어 있으면 실행이 중단됩니다.
@@ -57,11 +62,13 @@ note/
 scripts/init-env.sh                       # note/.env 생성 → 편집기로 비밀번호 채움
 python3 generate-data/generate_juso.py    # generate-data/result/202610_juso.txt
 
-# 1) DB (mariadb: localhost:9000, DB juso)
+# 1) DB (mariadb: localhost:9000, DB juso), 캐시(redis: localhost:9001)
 docker/manage.sh up mariadb
+docker/manage.sh up redis                 # 이미지 캐싱 화면에서만 필요
 
-# 2) 백엔드 — 터미널 2개에서 각각 실행 (.env 를 읽어 환경변수로 넘겨 줌)
+# 2) 백엔드 — 터미널을 나눠 각각 실행 (.env 를 읽어 환경변수로 넘겨 줌)
 scripts/run-backend.sh juso               # http://localhost:9204
+scripts/run-backend.sh image              # http://localhost:9205 (이미지 캐싱 화면에서만 필요)
 scripts/run-backend.sh gateway            # http://localhost:9203 (진입점)
 
 # 3) 프론트엔드 (http://localhost:9201)
@@ -73,6 +80,8 @@ scripts/run-frontend.sh
 
 - 적재할 방식을 체크해 순서대로 실행하고, 진행 메시지는 우측 하단 웹소켓 아이콘에서 볼 수 있습니다.
 - 적재 방식 비교와 노하우: [docs/bulk-insert.md](docs/bulk-insert.md)
+- 이미지 캐싱(Redis) 실험과 결과: [docs/image-cache.md](docs/image-cache.md)
+- 이미지 캐싱(캐시 없음 / 미리 만든 이미지 / Redis)은 왼쪽 메뉴 캐시 → 이미지 캐싱. 조건을 화면에서 바꿔 가며 실험합니다.
 - 수박 게임(Canvas + 직접 구현한 2D 물리) 만든 과정: [docs/suika-game.md](docs/suika-game.md)
 
 ## 인프라 컨테이너

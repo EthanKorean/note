@@ -21,12 +21,22 @@ export const useWsStore = defineStore('ws', () => {
   /** 서버에서 적재가 진행 중인지(이 화면에서 시작하지 않은 실행 포함) */
   const serverBusy = ref(false)
   let client: Client | null = null
+  let imageClient: Client | null = null
 
   const lastLog = computed(() => messages.value[0] ?? null)
+
+  /** 이미지 캐시 서버의 메시지(적재 상태와는 별개라서 serverBusy 는 건드리지 않는다) */
+  function handleImage(ev: WsEvent) {
+    push(ev)
+  }
 
   function handle(ev: WsEvent) {
     if (ev.level === 'info') serverBusy.value = true
     else serverBusy.value = false // success | error = 끝남
+    push(ev)
+  }
+
+  function push(ev: WsEvent) {
     messages.value.unshift(ev)
     if (messages.value.length > MAX_MESSAGES) messages.value.length = MAX_MESSAGES
     if (!panelOpen.value) unread.value++
@@ -46,6 +56,13 @@ export const useWsStore = defineStore('ws', () => {
       onWebSocketClose: () => (connected.value = false),
     })
     client.activate()
+
+    imageClient = new Client({
+      brokerURL: `${proto}://${location.host}/ws-image`,
+      reconnectDelay: 3000,
+      onConnect: () => imageClient?.subscribe('/topic/image', (m) => handleImage(JSON.parse(m.body) as WsEvent)),
+    })
+    imageClient.activate()
   }
 
   /** 새로 열었거나 재연결했을 때 서버의 현재 상태로 맞춘다. 상태 API가 없으면 웹소켓 메시지만 따른다. */

@@ -11,6 +11,7 @@ export default defineConfig({
       '/api': 'http://localhost:9203',
       // STOMP 웹소켓 (gateway 가 juso-service 로 중계)
       '/ws-juso': { target: 'ws://localhost:9203', ws: true },
+      '/ws-image': { target: 'ws://localhost:9203', ws: true },
     },
   },
 })
