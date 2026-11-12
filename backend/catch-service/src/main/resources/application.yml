@@ -1,0 +1,6 @@
+server:
+  port: 9206
+
+spring:
+  application:
+    name: catch-service

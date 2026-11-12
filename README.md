@@ -11,7 +11,8 @@ note/
 ├── backend/         Gradle 멀티 프로젝트 (MSA, Spring Boot 3.2 / Java 17)
 │   ├── gateway/         Spring Cloud Gateway (9203) — 모든 요청의 진입점
 │   ├── juso-service/    도로명주소 대용량 적재 API + STOMP 웹소켓 (9204)
-│   └── image-service/   이미지 캐싱 실험 API (9205, Redis)
+│   ├── image-service/   이미지 캐싱 실험 API (9205, Redis)
+│   └── catch-service/   캐치마인드 그림 맞추기 (9206, STOMP 웹소켓)
 ├── frontend/        Vue 3 + TypeScript + Pinia (Vite, 9201) — 좌측 메뉴 + 대용량 적재 화면
 ├── generate-data/   대용량 테스트 데이터 생성 (도로명주소 → result/202610_juso.txt)
 ├── docker/          인프라 컨테이너 모음 (mariadb, redis, 이후 mqtt/kafka 등) + manage.sh
@@ -69,6 +70,7 @@ docker/manage.sh up redis                 # 이미지 캐싱 화면에서만 필
 # 2) 백엔드 — 터미널을 나눠 각각 실행 (.env 를 읽어 환경변수로 넘겨 줌)
 scripts/run-backend.sh juso               # http://localhost:9204
 scripts/run-backend.sh image              # http://localhost:9205 (이미지 캐싱 화면에서만 필요)
+scripts/run-backend.sh catch              # http://localhost:9206 (캐치마인드 화면에서만 필요)
 scripts/run-backend.sh gateway            # http://localhost:9203 (진입점)
 
 # 3) 프론트엔드 (http://localhost:9201)

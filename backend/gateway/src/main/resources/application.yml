@@ -6,6 +6,10 @@ spring:
     name: gateway
   cloud:
     gateway:
+      httpclient:
+        websocket:
+          # 기본 64KB 를 넘는 메시지(캐치마인드에서 늦게 들어온 사람에게 보내는 그림 스냅샷)도 중계한다.
+          max-frame-payload-length: 1048576
       routes:
         # /api/juso/** 요청을 juso-service(9204)로 전달
         - id: juso-service
@@ -32,3 +36,8 @@ spring:
           uri: ws://localhost:9205
           predicates:
             - Path=/ws-image/**
+        # 캐치마인드 STOMP 웹소켓
+        - id: catch-ws
+          uri: ws://localhost:9206
+          predicates:
+            - Path=/ws-catch/**

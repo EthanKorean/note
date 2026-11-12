@@ -2,6 +2,7 @@
 # 백엔드를 .env 값으로 실행한다.
 #   scripts/run-backend.sh juso      juso-service (9204)
 #   scripts/run-backend.sh gateway   gateway (9203)
+#   scripts/run-backend.sh catch     catch-service (9206, 캐치마인드)
 #   scripts/run-backend.sh image     image-service (9205, Redis 필요: docker/manage.sh up redis)
 # 터미널을 하나씩 열어 각각 실행한다. DB 는 먼저 docker/manage.sh up mariadb 로 켠다.
 set -euo pipefail
@@ -23,5 +24,6 @@ case "${1:-}" in
              [[ -n "${!v:-}" ]] || { echo ".env 의 $v 가 비어 있습니다." >&2; exit 1; }
            done
            cd "$ROOT/backend" && exec ./gradlew :image-service:bootRun ;;
-  *)       sed -n '2,6p' "$0" | sed 's/^# \{0,1\}//'; exit 1 ;;
+  catch)   cd "$ROOT/backend" && exec ./gradlew :catch-service:bootRun ;;
+  *)       sed -n '2,7p' "$0" | sed 's/^# \{0,1\}//'; exit 1 ;;
 esac

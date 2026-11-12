@@ -15,7 +15,7 @@
 - **스타일**: 색은 `style.css`의 CSS 토큰(라이트/다크)만 쓴다.
 
 ## 환경
-- 포트는 모두 9000번대 (MariaDB 9000, Redis 9001, Vite 9201, gateway 9203, juso-service 9204, image-service 9205). 8000번대는 다른 프로젝트가 쓴다.
+- 포트는 모두 9000번대 (MariaDB 9000, Redis 9001, Vite 9201, gateway 9203, juso-service 9204, image-service 9205, catch-service 9206). 8000번대는 다른 프로젝트가 쓴다.
 - `java`는 PATH에 없다: `JAVA_HOME=/home/ethan/.jdks/corretto-17.0.12`. docker는 podman이라 `DOCKER_HOST=unix:///run/user/1004/podman/podman.sock`.
 - DB 작업을 하면 `schema.sql`도 함께 만든다.
 - 커밋/푸시는 사용자가 요청할 때만 한다.
