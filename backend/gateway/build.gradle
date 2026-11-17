@@ -1,6 +1,6 @@
 // Spring Cloud Gateway는 WebFlux 기반이라 spring-boot-starter-web을 넣으면 안 된다.
 ext {
-    set('springCloudVersion', '2023.0.1')   // Spring Boot 3.2.x와 호환
+    set('springCloudVersion', '2025.0.3')   // Spring Boot 3.5.x와 호환
 }
 
 dependencyManagement {

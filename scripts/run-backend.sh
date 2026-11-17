@@ -11,11 +11,11 @@ ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 [[ -f "$ROOT/.env" ]] || { echo ".env 가 없습니다. scripts/init-env.sh 를 먼저 실행하세요." >&2; exit 1; }
 
 set -a; source "$ROOT/.env"; set +a
+source "$ROOT/scripts/lib/platform.sh"
+setup_java   # OS 별로 JDK 25 를 찾는다 (.env 의 JAVA_HOME 이 우선)
 # .env 에서 비워 둔 값은 기본값으로 대체한다.
-[[ -n "${JAVA_HOME:-}" ]] && export PATH="$JAVA_HOME/bin:$PATH" || unset JAVA_HOME
 export NOTE_ROOT="$ROOT"   # 화면에 나가는 경로를 ${projectRoot} 로 가리는 데 쓴다
 export JUSO_DATA_FILE="${JUSO_DATA_FILE:-$ROOT/generate-data/result/202610_juso.txt}"
-command -v java >/dev/null || { echo "java 를 찾을 수 없습니다. .env 의 JAVA_HOME 에 JDK 17 경로를 적으세요." >&2; exit 1; }
 
 case "${1:-}" in
   juso)    [[ -n "${JUSO_DB_PASSWORD:-}" ]] || { echo ".env 의 JUSO_DB_PASSWORD 가 비어 있습니다." >&2; exit 1; }
