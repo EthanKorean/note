@@ -24,8 +24,11 @@ onBeforeUnmount(() => {
   root.style.scrollbarGutter = prev.gutter
 })
 
-/** 마우스를 누른 곳이 배경이었는지. 모달 안에서 글자를 드래그하다 배경에서 놓아도 닫히지 않게, 누른 곳과 뗀 곳이 모두 배경일 때만 닫는다. */
-let downOnBackdrop = false
+/** 누른 곳과 뗀 곳이 모두 배경일 때만 닫는다. 모달 안에서 글자를 드래그하다 배경에서 놓거나, 배경에서 눌러 모달 안에서 놓아도(이때도 click 은 dialog 로 온다) 닫히지 않게 한다. */
+// 화면에 그리지 않는 값이라 ref 로 만들 필요가 없다. `as boolean` 이 없으면 초기값 false 로 타입이 좁혀져
+// 템플릿의 대입(= $event.target === dlg)이 vue-tsc 오류가 되어 npm run build 가 실패한다.
+let downOnBackdrop = false as boolean
+let upOnBackdrop = false as boolean
 
 function close() {
   dlg.value?.close()
@@ -41,7 +44,7 @@ const codeBlocks = computed(() => props.demo.blocks.filter(isCode))
 
 <template>
   <!-- 배경(::backdrop)을 누르면 dialog 자신이 클릭 대상이 되므로 .self 로 닫는다. -->
-  <dialog ref="dlg" class="demo-modal" aria-labelledby="demo-title" @close="emit('close')" @mousedown="downOnBackdrop = $event.target === dlg" @click.self="downOnBackdrop && close()">
+  <dialog ref="dlg" class="demo-modal" aria-labelledby="demo-title" @close="emit('close')" @mousedown="downOnBackdrop = $event.target === dlg" @mouseup="upOnBackdrop = $event.target === dlg" @click.self="downOnBackdrop && upOnBackdrop && close()">
     <div class="demo-body">
       <header class="demo-head">
         <h2 id="demo-title">{{ term }} — {{ demo.title }}</h2>
