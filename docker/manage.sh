@@ -38,7 +38,12 @@ check_env() { # check_env <서비스>
 }
 
 source "$(cd .. && pwd)/scripts/lib/platform.sh"
-setup_docker   # OS 별로 docker 를 쓸 수 있게 맞춘다 (macOS: colima, Linux: podman 소켓)
+DOCKER_READY=0
+ensure_docker() { # docker 가 필요한 명령에서만 확인한다(list, help 는 데몬 없이도 동작)
+  [[ "$DOCKER_READY" == 1 ]] && return
+  setup_docker   # OS 별로 docker 를 쓸 수 있게 맞춘다 (macOS: colima, Linux: podman 소켓)
+  DOCKER_READY=1
+}
 
 if command -v docker-compose >/dev/null 2>&1; then
   COMPOSE=(docker-compose)
@@ -50,8 +55,14 @@ services() { for f in */docker-compose.yml; do dirname "$f"; done; }
 
 usage() { sed -n '2,13p' "$0" | sed 's/^# \{0,1\}//'; exit "${1:-1}"; }
 
+require_service() { # require_service <서비스>
+  [[ -f "$1/docker-compose.yml" ]] || { echo "알 수 없는 서비스: $1 (사용 가능: $(services | xargs))" >&2; exit 1; }
+}
+
 compose() { # compose <서비스> <인자...>
   local svc="$1"; shift
+  require_service "$svc"
+  ensure_docker
   # up 이외(down/logs/ps 등)는 비밀번호가 필요 없다. compose 의 필수값 검사에 걸리지 않게 빈 값만 임시로 채운다.
   if [[ "${1:-}" != "up" ]]; then
     local v
@@ -59,7 +70,6 @@ compose() { # compose <서비스> <인자...>
       grep -Eq "^${v}=.+" "$ENV_FILE" || { [[ "$v" == *PORT ]] && export "$v=0" || export "$v=unused"; }
     done
   fi
-  [[ -f "$svc/docker-compose.yml" ]] || { echo "알 수 없는 서비스: $svc (사용 가능: $(services | xargs))" >&2; exit 1; }
   (cd "$svc" && "${COMPOSE[@]}" --env-file "$ENV_FILE" "$@")
 }
 
@@ -69,6 +79,8 @@ case "$cmd" in
   down)    [[ -n "$svc" ]] || usage; compose "$svc" down ;;
   destroy)
     [[ -n "$svc" ]] || usage
+    require_service "$svc"
+    ensure_docker   # 확인을 받은 뒤에야 docker 가 없다고 실패하지 않게 먼저 확인한다
     read -r -p "'$svc' 컨테이너와 데이터 볼륨을 모두 삭제합니다. 계속할까요? [y/N] " ans
     [[ "$ans" == "y" || "$ans" == "Y" ]] || { echo "취소했습니다."; exit 0; }
     compose "$svc" down -v --remove-orphans ;;

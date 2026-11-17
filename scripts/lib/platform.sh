@@ -25,8 +25,9 @@ setup_java() {
         JAVA_HOME="$(/usr/libexec/java_home -v "$JAVA_VERSION" 2>/dev/null || true)" ;;
       Linux)
         local d
-        for d in "$HOME"/.jdks/*"$JAVA_VERSION"* /usr/lib/jvm/*"$JAVA_VERSION"*; do
-          [[ -x "$d/bin/java" ]] && { JAVA_HOME="$d"; break; }
+        # 폴더 이름은 믿지 않는다(jdk-17.0.25 는 25 가 아니고, default-java 는 25 일 수 있다). 실제 버전을 확인한다.
+        for d in "$HOME"/.jdks/* /usr/lib/jvm/*; do
+          [[ -x "$d/bin/java" && "$(java_major "$d")" == "$JAVA_VERSION" ]] && { JAVA_HOME="$d"; break; }
         done ;;
     esac
   fi
