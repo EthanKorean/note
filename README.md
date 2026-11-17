@@ -12,7 +12,8 @@ note/
 │   ├── gateway/         Spring Cloud Gateway (9203) — 모든 요청의 진입점
 │   ├── juso-service/    도로명주소 대용량 적재 API + STOMP 웹소켓 (9204)
 │   ├── image-service/   이미지 캐싱 실험 API (9205, Redis)
-│   └── catch-service/   캐치마인드 그림 맞추기 (9206, STOMP 웹소켓)
+│   ├── catch-service/   캐치마인드 그림 맞추기 (9206, STOMP 웹소켓)
+│   └── rag-service/     RAG 검색 실험 API (9207, 임베딩 모델을 서비스 안에서 실행)
 ├── frontend/        Vue 3 + TypeScript + Pinia (Vite, 9201) — 좌측 메뉴 + 대용량 적재 화면
 ├── generate-data/   대용량 테스트 데이터 생성 (도로명주소 → result/202610_juso.txt)
 ├── docker/          인프라 컨테이너 모음 (mariadb, redis, 이후 mqtt/kafka 등) + manage.sh
@@ -37,6 +38,7 @@ note/
 | `.env` | 프로젝트 **루트** (`note/.env`) | `scripts/init-env.sh` 로 `.env.example` 을 복사한 뒤 비밀번호 채움 | 커밋 금지(`.gitignore`). DB 계정/비밀번호, JDK 위치, 데이터 파일 경로 |
 | `202610_juso.txt` | `generate-data/result/` | `python3 generate-data/generate_juso.py` | 964MB, 커밋 금지. DB 컨테이너가 `/import` 로 같은 폴더를 읽는다 |
 | MariaDB 데이터 | 컨테이너 볼륨 `mariadb-data` | `docker/manage.sh up mariadb` | 최초 기동 시 `docker/mariadb/initdb/01-schema.sql` 자동 적용 |
+| 임베딩 모델 | 프로젝트 루트 `rag-data/model/` | RAG 검색 화면의 "모델 받고 준비하기" 버튼 | 커밋 금지, 재내려받기 가능(약 135MB) |
 | 상품 이미지 | 프로젝트 루트 `image-data/` | 이미지 캐싱 화면의 "이미지 만들기" 버튼 | 커밋 금지, 재생성 가능(1,000개 약 10초, 76MB) |
 
 `.env` 에 들어가는 값(자세한 설명은 `.env.example`):
@@ -50,6 +52,7 @@ note/
 | `REDIS_PORT`, `REDIS_PASSWORD` | Redis 컨테이너와 image-service 접속 정보 (기본 포트 9001) — 비밀번호는 **반드시 채운다** |
 | `IMAGE_DIR` | 상품 이미지 폴더(절대 경로). 비우면 `image-data/` |
 | `IMAGE_SAMPLE_URL`, `IMAGE_SAMPLE_THREADS` | (선택) "샘플 사진 받기" 주소 템플릿과 동시 다운로드 수. 기본은 picsum.photos, 8개 |
+| `RAG_DOCS_DIR`, `RAG_MODEL_DIR`, `RAG_DOCS_EXCLUDE` | (선택) RAG 검색 대상 문서 폴더, 모델 저장 폴더, 검색 대상에서 뺄 파일. 비우면 `docs/`, `rag-data/model/`, `rag.md` |
 | `JAVA_HOME` | `java` 가 PATH 에 없을 때 JDK 17 위치 |
 
 코드와 설정 파일(`application.yml`, `docker-compose.yml`)에는 비밀번호를 적지 않습니다. 비어 있으면 실행이 중단됩니다.
@@ -71,6 +74,7 @@ docker/manage.sh up redis                 # 이미지 캐싱 화면에서만 필
 scripts/run-backend.sh juso               # http://localhost:9204
 scripts/run-backend.sh image              # http://localhost:9205 (이미지 캐싱 화면에서만 필요)
 scripts/run-backend.sh catch              # http://localhost:9206 (캐치마인드 화면에서만 필요)
+scripts/run-backend.sh rag                # http://localhost:9207 (RAG 검색 화면에서만 필요, 결과 저장용 mariadb 필요)
 scripts/run-backend.sh gateway            # http://localhost:9203 (진입점)
 
 # 3) 프론트엔드 (http://localhost:9201)
@@ -84,6 +88,7 @@ scripts/run-frontend.sh
 - 적재 방식 비교와 노하우: [docs/bulk-insert.md](docs/bulk-insert.md)
 - 이미지 캐싱(Redis) 실험과 결과: [docs/image-cache.md](docs/image-cache.md)
 - 이미지 캐싱(캐시 없음 / 미리 만든 이미지 / Redis)은 왼쪽 메뉴 캐시 → 이미지 캐싱. 조건을 화면에서 바꿔 가며 실험합니다.
+- RAG 검색(청킹·임베딩·키워드/벡터/하이브리드 검색 정답률 비교)과 왜 하는지: [docs/rag.md](docs/rag.md). 모르는 용어는 왼쪽 메뉴 AI → AI 용어 정리
 - 수박 게임(Canvas + 직접 구현한 2D 물리) 만든 과정: [docs/suika-game.md](docs/suika-game.md)
 
 ## 인프라 컨테이너

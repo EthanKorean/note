@@ -23,6 +23,13 @@ export const menu: MenuGroup[] = [
     items: [{ path: '/image-cache', label: '이미지 캐싱', desc: '인기·한시 상품 이미지를 Redis로 캐싱' }],
   },
   {
+    title: 'AI',
+    items: [
+      { path: '/ai-terms', label: 'AI 용어 정리', desc: 'RAG, 에이전트, MCP 같은 새 용어와 카페 예제' },
+      { path: '/rag', label: 'RAG 검색', desc: '문서를 잘라 벡터로 만들고 청킹·검색 방식별 정답률 비교' },
+    ],
+  },
+  {
     title: '게임',
     items: [
       { path: '/suika', label: '수박 게임', desc: '원을 합쳐 수박 만들기' },

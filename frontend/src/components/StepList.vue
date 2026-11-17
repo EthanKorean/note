@@ -39,7 +39,7 @@ const bodyId = (i: number) => `${props.id}-body-${i}`
 <style scoped>
 .steps { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; border: 1px solid var(--border); border-radius: 8px; overflow: hidden; }
 .steps > li + li { border-top: 1px solid var(--border); }
-.step-head { all: unset; box-sizing: border-box; width: 100%; display: flex; gap: 10px; align-items: baseline; padding: 10px 12px; cursor: pointer; font-size: 0.88rem; }
+.step-head { all: unset; box-sizing: border-box; width: 100%; display: flex; gap: 10px; align-items: baseline; padding: 10px 12px; cursor: pointer; font-size: 1rem; }
 .step-head:hover { background: var(--tag-bg); }
 .step-head:focus-visible { outline: 2px solid var(--accent); outline-offset: -2px; }
 .step-head b { flex: none; min-width: 4.5em; }

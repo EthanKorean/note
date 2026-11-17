@@ -110,6 +110,6 @@ public class JusoController {
     }
 
     private static ResponseEntity<Map<String, String>> error(HttpStatus status, Exception e) {
-        return ResponseEntity.status(status).body(Map.of("error", String.valueOf(e.getMessage())));
+        return ResponseEntity.status(status).body(Map.of("error", PathMask.scrub(String.valueOf(e.getMessage()))));
     }
 }

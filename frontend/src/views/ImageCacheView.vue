@@ -2,6 +2,7 @@
 import { onMounted, onUnmounted, watch } from 'vue'
 import { storeToRefs } from 'pinia'
 import { useImageStore } from '../stores/image'
+import { useWsStore } from '../stores/ws'
 import ImagePrep from '../components/ImagePrep.vue'
 import ImageBench from '../components/ImageBench.vue'
 import ImageRuns from '../components/ImageRuns.vue'
@@ -20,6 +21,7 @@ const sections = [
 ]
 
 onMounted(() => {
+  useWsStore().connectTopic('image') // 이미지 서비스의 진행 메시지(웹소켓 패널)는 이 화면에서 연결한다
   store.loadRuns()
   store.loadReplaceRuns()
 })

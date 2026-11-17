@@ -1,0 +1,11 @@
+dependencies {
+    implementation 'org.springframework.boot:spring-boot-starter-web'
+    implementation 'org.springframework.boot:spring-boot-starter-websocket'   // 진행 메시지(STOMP)
+    implementation 'org.springframework.boot:spring-boot-starter-jdbc'         // 결과를 test_result 에 저장
+    runtimeOnly 'org.mariadb.jdbc:mariadb-java-client'
+
+    // 임베딩을 서비스 안에서 직접 계산한다(별도 설치/API 키 없음): ONNX 모델 + HuggingFace 토크나이저
+    implementation 'com.microsoft.onnxruntime:onnxruntime:1.17.3'
+    implementation 'ai.djl:api:0.28.0'
+    implementation 'ai.djl.huggingface:tokenizers:0.28.0'
+}

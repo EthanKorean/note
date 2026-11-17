@@ -4,6 +4,7 @@
 #   scripts/run-backend.sh gateway   gateway (9203)
 #   scripts/run-backend.sh catch     catch-service (9206, 캐치마인드)
 #   scripts/run-backend.sh image     image-service (9205, Redis 필요: docker/manage.sh up redis)
+#   scripts/run-backend.sh rag       rag-service (9207, 처음 한 번 화면에서 모델 내려받기)
 # 터미널을 하나씩 열어 각각 실행한다. DB 는 먼저 docker/manage.sh up mariadb 로 켠다.
 set -euo pipefail
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
@@ -12,6 +13,7 @@ ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 set -a; source "$ROOT/.env"; set +a
 # .env 에서 비워 둔 값은 기본값으로 대체한다.
 [[ -n "${JAVA_HOME:-}" ]] && export PATH="$JAVA_HOME/bin:$PATH" || unset JAVA_HOME
+export NOTE_ROOT="$ROOT"   # 화면에 나가는 경로를 ${projectRoot} 로 가리는 데 쓴다
 export JUSO_DATA_FILE="${JUSO_DATA_FILE:-$ROOT/generate-data/result/202610_juso.txt}"
 command -v java >/dev/null || { echo "java 를 찾을 수 없습니다. .env 의 JAVA_HOME 에 JDK 17 경로를 적으세요." >&2; exit 1; }
 
@@ -25,5 +27,11 @@ case "${1:-}" in
            done
            cd "$ROOT/backend" && exec ./gradlew :image-service:bootRun ;;
   catch)   cd "$ROOT/backend" && exec ./gradlew :catch-service:bootRun ;;
-  *)       sed -n '2,7p' "$0" | sed 's/^# \{0,1\}//'; exit 1 ;;
+  rag)     export RAG_DOCS_DIR="${RAG_DOCS_DIR:-$ROOT/docs}"
+           export RAG_MODEL_DIR="${RAG_MODEL_DIR:-$ROOT/rag-data/model}"
+           for v in JUSO_DB_URL JUSO_DB_USER JUSO_DB_PASSWORD; do
+             [[ -n "${!v:-}" ]] || { echo ".env 의 $v 가 비어 있습니다." >&2; exit 1; }
+           done
+           cd "$ROOT/backend" && exec ./gradlew :rag-service:bootRun ;;
+  *)       sed -n '2,8p' "$0" | sed 's/^# \{0,1\}//'; exit 1 ;;
 esac

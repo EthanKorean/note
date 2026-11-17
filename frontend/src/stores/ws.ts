@@ -21,13 +21,17 @@ export const useWsStore = defineStore('ws', () => {
   /** 서버에서 적재가 진행 중인지(이 화면에서 시작하지 않은 실행 포함) */
   const serverBusy = ref(false)
   let client: Client | null = null
-  let imageClient: Client | null = null
 
   const lastLog = computed(() => messages.value[0] ?? null)
 
-  /** 이미지 캐시 서버의 메시지(적재 상태와는 별개라서 serverBusy 는 건드리지 않는다) */
-  function handleImage(ev: WsEvent) {
-    push(ev)
+  /** 적재(juso) 외 서비스(이미지 캐시, RAG)의 메시지를 같은 패널로 모은다. 적재 상태 serverBusy 는 건드리지 않는다. */
+  function openTopic(brokerURL: string, topic: string): void {
+    const c: Client = new Client({
+      brokerURL,
+      reconnectDelay: 3000,
+      onConnect: () => c.subscribe(topic, (m) => push(JSON.parse(m.body) as WsEvent)),
+    })
+    c.activate()
   }
 
   function handle(ev: WsEvent) {
@@ -57,12 +61,22 @@ export const useWsStore = defineStore('ws', () => {
     })
     client.activate()
 
-    imageClient = new Client({
-      brokerURL: `${proto}://${location.host}/ws-image`,
-      reconnectDelay: 3000,
-      onConnect: () => imageClient?.subscribe('/topic/image', (m) => handleImage(JSON.parse(m.body) as WsEvent)),
-    })
-    imageClient.activate()
+  }
+
+  /**
+   * 이미지 캐시, RAG 서비스의 메시지는 그 화면을 처음 열 때 연결한다. 모든 화면에서 미리 열어 두면 해당 서비스가 꺼져 있는 동안
+   * 3초마다 연결에 실패하는 요청이 탭이 열려 있는 내내 반복된다.
+   */
+  const topics = {
+    image: { path: '/ws-image', topic: '/topic/image' },
+    rag: { path: '/ws-rag', topic: '/topic/rag' },
+  } as const
+  const opened = new Set<string>()
+  function connectTopic(name: keyof typeof topics) {
+    if (opened.has(name)) return
+    opened.add(name)
+    const proto = location.protocol === 'https:' ? 'wss' : 'ws'
+    openTopic(`${proto}://${location.host}${topics[name].path}`, topics[name].topic)
   }
 
   /** 새로 열었거나 재연결했을 때 서버의 현재 상태로 맞춘다. 상태 API가 없으면 웹소켓 메시지만 따른다. */
@@ -89,5 +103,5 @@ export const useWsStore = defineStore('ws', () => {
     unread.value = 0
   }
 
-  return { connected, serverBusy, syncStatus, messages, unread, panelOpen, lastLog, connect, togglePanel, clear }
+  return { connected, serverBusy, syncStatus, messages, unread, panelOpen, lastLog, connect, connectTopic, togglePanel, clear }
 })

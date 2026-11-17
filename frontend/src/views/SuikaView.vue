@@ -182,18 +182,18 @@ onBeforeUnmount(() => {
 .board { width: min(100%, calc(500px * 360 / 520)); height: auto; aspect-ratio: 360 / 520; /* 높이 최대 500px, 비율 유지 */ border: 1px solid var(--border); border-radius: 8px; touch-action: none; cursor: pointer; }
 .panel { display: flex; flex-direction: column; gap: 18px; min-width: 0; }
 .stats { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; }
-.stat { display: flex; flex-direction: column; gap: 2px; padding: 12px 14px; background: var(--tag-bg); border-radius: 8px; font-size: 0.85rem; }
+.stat { display: flex; flex-direction: column; gap: 2px; padding: 12px 14px; background: var(--tag-bg); border-radius: 8px; font-size: 1rem; }
 .restart { align-self: flex-start; min-width: 140px; }
-.order { display: flex; flex-direction: column; gap: 10px; font-size: 0.85rem; }
+.order { display: flex; flex-direction: column; gap: 10px; font-size: 1rem; }
 .stat b { font-size: 1.6rem; line-height: 1.2; font-variant-numeric: tabular-nums; }
 .next { display: flex; align-items: center; gap: 8px; font-weight: 600; }
 .chain { list-style: none; margin: 0; padding: 0; display: flex; flex-wrap: wrap; gap: 10px; align-items: flex-end; }
 .chain li { display: flex; flex-direction: column; align-items: center; gap: 4px; }
-.count { font-size: 0.72rem; font-variant-numeric: tabular-nums; color: var(--text); font-weight: 600; }
+.count { font-size: 1rem; font-variant-numeric: tabular-nums; color: var(--text); font-weight: 600; }
 .count.zero { color: var(--muted); font-weight: 400; }
 @media (max-width: 760px) { .suika { grid-template-columns: minmax(0, 1fr); } }
 .bounce { padding-top: 0; align-self: center; }
-.sub { margin: 14px 0 0; font-size: 0.95rem; }
+.sub { margin: 14px 0 0; font-size: 1rem; }
 .sub:first-child { margin-top: 0; }
 .story li::before { content: '-'; flex: none; color: var(--muted); }
 </style>

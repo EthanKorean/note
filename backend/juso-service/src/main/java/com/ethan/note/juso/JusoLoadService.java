@@ -60,7 +60,7 @@ public class JusoLoadService {
             o = new LoadOptions(o.engine(), o.batchSize(), o.threads(), o.deferIndex(), false, o.truncate());
         }
         if (!Files.isReadable(dataFile)) {
-            throw new IllegalArgumentException("데이터 파일이 없습니다: " + dataFile
+            throw new IllegalArgumentException("데이터 파일이 없습니다: " + PathMask.show(dataFile)
                     + " (generate-data/generate_juso.py 로 만들거나 juso.data-file 을 지정하세요)");
         }
 

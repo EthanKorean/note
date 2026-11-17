@@ -249,11 +249,11 @@ onBeforeUnmount(() => {
 
 <style scoped>
 .host-tag { background: var(--accent); color: var(--accent-text); font-weight: 700; }
-.err { margin: 0 0 10px; color: var(--danger); font-size: 0.9rem; }
+.err { margin: 0 0 10px; color: var(--danger); font-size: 1rem; }
 tr.gone td { color: var(--muted); text-decoration: line-through; }
 tr.mine td { background: var(--tag-bg); }
 .statusbar { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 16px; margin-bottom: 12px; }
-.headline { font-size: 0.95rem; }
+.headline { font-size: 1rem; }
 .clock { padding: 2px 10px; border-radius: 999px; background: var(--tag-bg); font-variant-numeric: tabular-nums; font-weight: 700; }
 .clock.low { background: var(--danger); color: var(--accent-text); }
 .play { display: grid; grid-template-columns: minmax(0, 1fr) 280px; gap: 16px; align-items: stretch; }
@@ -264,13 +264,13 @@ tr.mine td { background: var(--tag-bg); }
 .tools .on { border-color: var(--accent); color: var(--accent); }
 .sep { width: 1px; height: 20px; background: var(--border); margin: 0 4px; }
 .chatbox { display: flex; flex-direction: column; gap: 8px; min-width: 0; }
-.chatlog { list-style: none; margin: 0; padding: 10px; flex: 1; min-height: 200px; max-height: 420px; overflow-y: auto; background: var(--tag-bg); border-radius: 8px; font-size: 0.85rem; display: flex; flex-direction: column; gap: 4px; }
+.chatlog { list-style: none; margin: 0; padding: 10px; flex: 1; min-height: 200px; max-height: 420px; overflow-y: auto; background: var(--tag-bg); border-radius: 8px; font-size: 1rem; display: flex; flex-direction: column; gap: 4px; }
 .chatlog li { overflow-wrap: anywhere; }
 .chatlog li.k-system { color: var(--muted); }
 .chatlog li.k-correct { color: var(--accent); font-weight: 600; }
 .say { display: flex; gap: 6px; }
 .say input { flex: 1; min-width: 0; }
 .hint { margin: 0; }
-.opt-note { align-self: center; font-size: 0.82rem; }
+.opt-note { align-self: center; font-size: 1rem; }
 @media (max-width: 860px) { .play { grid-template-columns: minmax(0, 1fr); } }
 </style>

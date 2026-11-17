@@ -42,7 +42,7 @@ public class ImageController {
     public Map<String, Object> status() {
         Map<String, Object> m = new LinkedHashMap<>();
         m.put("count", store.count());
-        m.put("dir", store.dir().toString());
+        m.put("dir", PathMask.show(store.dir()));
         m.put("running", runner.isRunning());
         Map<String, Long> bytes = new LinkedHashMap<>();
         for (ImageSize s : ImageSize.values()) {
@@ -129,12 +129,12 @@ public class ImageController {
 
     @ExceptionHandler(BusyException.class)
     public ResponseEntity<Map<String, String>> busy(BusyException e) {
-        return ResponseEntity.status(HttpStatus.CONFLICT).body(Map.of("error", e.getMessage()));
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(Map.of("error", PathMask.scrub(e.getMessage())));
     }
 
     @ExceptionHandler(IllegalArgumentException.class)
     public ResponseEntity<Map<String, String>> badRequest(IllegalArgumentException e) {
-        return ResponseEntity.badRequest().body(Map.of("error", String.valueOf(e.getMessage())));
+        return ResponseEntity.badRequest().body(Map.of("error", PathMask.scrub(String.valueOf(e.getMessage()))));
     }
 
     @ExceptionHandler({org.springframework.http.converter.HttpMessageNotReadableException.class})
@@ -143,20 +143,20 @@ public class ImageController {
         while (root.getCause() != null) {
             root = root.getCause();
         }
-        return ResponseEntity.badRequest().body(Map.of("error", String.valueOf(root.getMessage())));
+        return ResponseEntity.badRequest().body(Map.of("error", PathMask.scrub(String.valueOf(root.getMessage()))));
     }
 
     @ExceptionHandler(Exception.class)
     public ResponseEntity<Map<String, String>> failed(Exception e) {
         // 스프링이 만든 4xx(타입 불일치, 405 등)는 그대로 돌려준다. 500 으로 덮어쓰지 않는다.
         if (e instanceof org.springframework.web.ErrorResponse er && er.getStatusCode().is4xxClientError()) {
-            return ResponseEntity.status(er.getStatusCode()).body(Map.of("error", String.valueOf(e.getMessage())));
+            return ResponseEntity.status(er.getStatusCode()).body(Map.of("error", PathMask.scrub(String.valueOf(e.getMessage()))));
         }
         if (e instanceof org.springframework.web.method.annotation.MethodArgumentTypeMismatchException) {
             return ResponseEntity.badRequest().body(Map.of("error", "잘못된 값입니다: " + e.getMessage()));
         }
         log.error("요청 실패", e);
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                .body(Map.of("error", String.valueOf(e.getMessage())));
+                .body(Map.of("error", PathMask.scrub(String.valueOf(e.getMessage()))));
     }
 }
