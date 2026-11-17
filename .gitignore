@@ -36,3 +36,11 @@ image-data/
 
 # 내려받은 임베딩 모델(재내려받기 가능)
 rag-data/
+
+# Playwright 결과(스크린샷, 추적)
+frontend/test-results/
+frontend/playwright-report/
+
+# Python 캐시
+__pycache__/
+*.pyc

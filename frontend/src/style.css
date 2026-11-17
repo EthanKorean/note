@@ -122,11 +122,13 @@ a.item:focus-visible { outline: 2px solid var(--accent); outline-offset: 1px; }
 .tests { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 8px; }
 .tests li { display: flex; flex-wrap: wrap; gap: 4px 12px; align-items: baseline; }
 .tests a { color: var(--accent); font-weight: 600; text-decoration: none; }
+.notify-opt { margin-top: auto; } /* 좁은 화면 규칙(아래 @media)이 이기도록 그보다 앞에 둔다 */
 @media (max-width: 760px) {
   .shell { grid-template-columns: minmax(0, 1fr); }
   .side { position: static; height: auto; flex-direction: row; flex-wrap: wrap; align-items: center; border-right: 0; border-bottom: 1px solid var(--border); gap: 8px 14px; }
   .group-title { display: none; }
   .group { flex-direction: row; flex-wrap: wrap; }
+  .notify-opt { margin-top: 0; }
 }
 
 h1 { font-size: 1.5rem; margin: 0 0 4px; }
@@ -391,3 +393,17 @@ button.busy { display: inline-flex; align-items: center; justify-content: center
 .warn-text { color: var(--warn-text); }
 .cond.wrap { white-space: normal; min-width: 220px; max-width: 300px; line-height: 1.4; }
 .group-row td { background: var(--bg); color: var(--muted); font-size: 1rem; padding-top: 0.6rem; border-bottom: 1px solid var(--border); }
+
+/* claude-toast 알림 (화면 오른쪽 위. 웹소켓 패널은 오른쪽 아래) */
+.toast-host { position: fixed; top: max(16px, env(safe-area-inset-top, 0px)); right: max(16px, env(safe-area-inset-right, 0px)); z-index: 60; display: flex; flex-direction: column; gap: 10px; width: min(360px, calc(100vw - 32px)); pointer-events: none; }
+.toast { pointer-events: auto; cursor: pointer; background: var(--surface); color: var(--text); border: 1px solid var(--border); border-left: 4px solid var(--accent); border-radius: 8px; padding: 10px 12px; box-shadow: 0 8px 28px rgba(0, 0, 0, 0.22); }
+.toast.kind-info { border-left-color: var(--muted); }
+.toast.kind-attention { border-left-color: var(--warn-text); background: var(--warn-bg); color: var(--warn-text); }
+.toast.kind-error { border-left-color: var(--danger); }
+.toast-head { display: flex; align-items: center; gap: 6px; }
+.toast-head strong { flex: 1; min-width: 0; overflow-wrap: anywhere; }
+.toast p { margin: 4px 0 0; overflow-wrap: anywhere; }
+.toast:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.toast-enter-active, .toast-leave-active { transition: opacity 0.2s, transform 0.2s; }
+.toast-enter-from, .toast-leave-to { opacity: 0; transform: translateX(24px); }
+@media (prefers-reduced-motion: reduce) { .toast-enter-active, .toast-leave-active { transition: none; } }

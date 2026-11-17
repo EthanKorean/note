@@ -1,0 +1,8 @@
+server:
+  port: 9208
+  # 같은 컴퓨터의 훅(Claude Code)과 브라우저(vite 프록시)만 접속한다. 알림에 작업 내용 일부가 들어가므로 밖으로 열지 않는다.
+  address: 127.0.0.1
+
+spring:
+  application:
+    name: toast-service

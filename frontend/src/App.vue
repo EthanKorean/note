@@ -1,7 +1,13 @@
 <script setup lang="ts">
+import { onMounted } from 'vue'
 import { RouterLink, RouterView } from 'vue-router'
 import { menu } from './menu'
+import { useToastStore } from './stores/toast'
 import WsPanel from './components/WsPanel.vue'
+import ToastHost from './components/ToastHost.vue'
+
+const toast = useToastStore()
+onMounted(() => toast.connect()) // claude-toast 알림은 어느 화면에서든 받는다
 </script>
 
 <template>
@@ -15,10 +21,12 @@ import WsPanel from './components/WsPanel.vue'
           <RouterLink v-else :to="i.path" class="item" active-class="on" exact-active-class="on">{{ i.label }}</RouterLink>
         </template>
       </div>
+      <button v-if="toast.permission === 'default'" type="button" class="ghost notify-opt" @click="toast.requestPermission()">브라우저 알림 허용</button>
     </nav>
     <main>
       <RouterView />
     </main>
   </div>
   <WsPanel />
+  <ToastHost />
 </template>
