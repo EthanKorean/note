@@ -37,12 +37,8 @@ check_env() { # check_env <서비스>
   done
 }
 
-# podman 에뮬레이션 환경: 기본 소켓(/var/run/docker.sock)은 root 전용이라
-# 사용자용 소켓이 있으면 그걸 쓴다.
-USER_SOCK="/run/user/$(id -u)/podman/podman.sock"
-if [[ -z "${DOCKER_HOST:-}" && -S "$USER_SOCK" && ! -w /var/run/docker.sock ]]; then
-  export DOCKER_HOST="unix://$USER_SOCK"
-fi
+source "$(cd .. && pwd)/scripts/lib/platform.sh"
+setup_docker   # OS 별로 docker 를 쓸 수 있게 맞춘다 (macOS: colima, Linux: podman 소켓)
 
 if command -v docker-compose >/dev/null 2>&1; then
   COMPOSE=(docker-compose)
