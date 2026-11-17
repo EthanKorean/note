@@ -8,7 +8,7 @@ Vue + Spring Boot로 여러 주제를 공부하고, 작은 프로젝트를 직�
 ```
 note/
 ├── .env.example     환경변수 견본 (복사해서 .env 를 만든다. .env 는 커밋되지 않음)
-├── backend/         Gradle 멀티 프로젝트 (MSA, Spring Boot 3.2 / Java 17)
+├── backend/         Gradle 멀티 프로젝트 (MSA, Spring Boot 3.5 / Java 25)
 │   ├── gateway/         Spring Cloud Gateway (9203) — 모든 요청의 진입점
 │   ├── juso-service/    도로명주소 대용량 적재 API + STOMP 웹소켓 (9204)
 │   ├── image-service/   이미지 캐싱 실험 API (9205, Redis)
@@ -24,7 +24,7 @@ note/
 
 | 영역 | 사용 기술 |
 |---|---|
-| Backend | Java 17, Spring Boot 3.2.4, Spring Cloud Gateway, JDBC / MyBatis / Spring Data JPA, STOMP(WebSocket), Spring Data Redis(Lettuce), MariaDB 11.4, Redis 7 |
+| Backend | Java 25, Spring Boot 3.5, Spring Cloud Gateway, JDBC / MyBatis / Spring Data JPA, STOMP(WebSocket), Spring Data Redis(Lettuce), MariaDB 11.4, Redis 7 |
 | Frontend | Vue 3, TypeScript, Pinia, vue-router, highlight.js, Vite 5 |
 | Build | Gradle (wrapper 포함), npm |
 
@@ -34,7 +34,7 @@ note/
 
 | 파일 | 위치 | 만드는 법 | 비고 |
 |---|---|---|---|
-| `.env` | 프로젝트 **루트** (`note/.env`) | `scripts/init-env.sh` 로 `.env.example` 을 복사한 뒤 비밀번호 채움 | 커밋 금지(`.gitignore`). DB 계정/비밀번호, JDK 위치, 데이터 파일 경로 |
+| `.env` | 프로젝트 **루트** (`note/.env`) | `scripts/init-env.sh` 로 `.env.example` 을 복사하고 비밀번호를 직접 입력(엔터는 랜덤) | 커밋 금지(`.gitignore`). DB 계정/비밀번호, JDK 위치, 데이터 파일 경로 |
 | `202610_juso.txt` | `generate-data/result/` | `python3 generate-data/generate_juso.py` | 964MB, 커밋 금지. DB 컨테이너가 `/import` 로 같은 폴더를 읽는다 |
 | MariaDB 데이터 | 컨테이너 볼륨 `mariadb-data` | `docker/manage.sh up mariadb` | 최초 기동 시 `docker/mariadb/initdb/01-schema.sql` 자동 적용 |
 | 상품 이미지 | 프로젝트 루트 `image-data/` | 이미지 캐싱 화면의 "이미지 만들기" 버튼 | 커밋 금지, 재생성 가능(1,000개 약 10초, 76MB) |
@@ -50,17 +50,24 @@ note/
 | `REDIS_PORT`, `REDIS_PASSWORD` | Redis 컨테이너와 image-service 접속 정보 (기본 포트 9001) — 비밀번호는 **반드시 채운다** |
 | `IMAGE_DIR` | 상품 이미지 폴더(절대 경로). 비우면 `image-data/` |
 | `IMAGE_SAMPLE_URL`, `IMAGE_SAMPLE_THREADS` | (선택) "샘플 사진 받기" 주소 템플릿과 동시 다운로드 수. 기본은 picsum.photos, 8개 |
-| `JAVA_HOME` | `java` 가 PATH 에 없을 때 JDK 17 위치 |
+| `JAVA_HOME` | `java` 가 PATH 에 없을 때 JDK 25 위치 |
 
 코드와 설정 파일(`application.yml`, `docker-compose.yml`)에는 비밀번호를 적지 않습니다. 비어 있으면 실행이 중단됩니다.
 
 ## 실행 방법
 
-필요한 것: JDK 17, Node.js 18+, docker(또는 podman)
+필요한 것: JDK 25, Node.js 18+, docker(또는 podman)
+
+macOS 에서는 docker 가 없으면 colima 로 대신합니다. JDK 25 는 `JAVA_HOME` 을 비워 두면 OS 별로 자동으로 찾습니다(`scripts/lib/platform.sh`).
+
+```bash
+brew install colima docker docker-compose
+colima start
+```
 
 ```bash
 # 0) 처음 한 번: .env 만들고 비밀번호 채우기, 데이터 준비
-scripts/init-env.sh                       # note/.env 생성 → 편집기로 비밀번호 채움
+scripts/init-env.sh                       # note/.env 생성 → 비밀번호를 물어봄 (엔터는 랜덤, 전부 랜덤은 --random)
 python3 generate-data/generate_juso.py    # generate-data/result/202610_juso.txt
 
 # 1) DB (mariadb: localhost:9000, DB juso), 캐시(redis: localhost:9001)
@@ -97,7 +104,7 @@ docker/manage.sh list               # 사용 가능한 서비스 목록
 
 - 새 서비스는 `docker/<이름>/docker-compose.yml` 만 만들면 `manage.sh` 로 바로 다룰 수 있습니다. 비밀번호 같은 값은 루트 `.env` 에 추가합니다.
 - DB를 만들 때는 항상 `schema.sql` 을 함께 둡니다. (mariadb: `docker/mariadb/initdb/01-schema.sql`, 최초 기동 시 자동 적용)
-- podman 에뮬레이션 환경에서는 `manage.sh` 가 사용자용 소켓(`/run/user/<uid>/podman/podman.sock`)을 자동으로 씁니다.
+- podman 에뮬레이션 환경에서는 `manage.sh` 가 사용자용 소켓(`/run/user/$(id -u)/podman/podman.sock`)을 자동으로 씁니다.
 
 ## 규칙
 
