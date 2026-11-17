@@ -91,7 +91,7 @@ public class ReplaceRunner {
             events.success(strategy, String.format("완료: 옛 이미지 %d/%d건(%.0f%%), 쓸모없는 옛 키 %d개", stale, requests, r.stalePct() * 100, r.orphanKeys()));
             return r;
         } catch (Exception e) {
-            events.error(strategy, "실패: " + e.getMessage());
+            events.error(strategy, "실패: " + PathMask.scrub(e.getMessage())); // 웹소켓으로 나가므로 경로를 가린다
             throw e;
         } finally {
             guard.release();

@@ -94,7 +94,7 @@ public class EvalRunner {
             events.success("eval", "검색 평가 완료 (" + elapsedMs + "ms)");
             return result;
         } catch (RuntimeException e) {
-            events.error("eval", "검색 평가 실패: " + e.getMessage());
+            events.error("eval", "검색 평가 실패: " + PathMask.scrub(e.getMessage())); // 웹소켓으로 나가므로 경로를 가린다
             throw e;
         } finally {
             guard.release();

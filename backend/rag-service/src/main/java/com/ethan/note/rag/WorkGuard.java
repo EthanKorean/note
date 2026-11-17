@@ -11,8 +11,9 @@ public class WorkGuard {
 
     /** 작업을 시작한다. 이미 다른 작업이 있으면 BusyException. 끝나면 반드시 release() 를 부른다. */
     public void acquire(String what) {
-        if (!current.compareAndSet(null, what)) {
-            throw new BusyException("다른 작업이 실행 중입니다: " + current.get());
+        String prev = current.compareAndExchange(null, what);
+        if (prev != null) {
+            throw new BusyException("다른 작업이 실행 중입니다: " + prev); // 실패한 시점의 값을 그대로 쓴다(다시 읽으면 그 사이 null 이 될 수 있다)
         }
     }
 

@@ -147,9 +147,11 @@ public class JusoLoadService {
             // 사용자 입력 오류(400)는 기록하지 않고, 실행 중 실패만 남긴다.
             if (!(e instanceof IllegalArgumentException) || e instanceof NumberFormatException) {
                 log.error("[{}/{}] 적재 실패", method, o.engine(), e);
+                // 결과 이력(화면에 보임)과 웹소켓으로 나가므로 경로를 가린다
+                String msg = PathMask.scrub(rootMessage(e));
                 results.saveQuietly("load", method, o.engine(), TestResultRepository.FAIL, msSince(t0),
-                        Map.of("error", rootMessage(e), "options", o));
-                events.error(method, "실패: " + rootMessage(e));
+                        Map.of("error", msg, "options", o));
+                events.error(method, "실패: " + msg);
             }
             throw e;
         } finally {

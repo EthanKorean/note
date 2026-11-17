@@ -97,7 +97,7 @@ public class ImageController {
             throw e;
         } catch (Exception e) {
             log.error("실험 실패", e);
-            results.save(p.mode(), "fail", (System.nanoTime() - t0) / 1_000_000, Map.of("error", String.valueOf(e.getMessage()), "params", p));
+            results.save(p.mode(), "fail", (System.nanoTime() - t0) / 1_000_000, Map.of("error", String.valueOf(PathMask.scrub(e.getMessage())), "params", p));
             throw e;
         }
     }
@@ -116,7 +116,7 @@ public class ImageController {
             throw e;
         } catch (Exception e) {
             results.save("image-replace", strategy, "fail", (System.nanoTime() - t0) / 1_000_000,
-                    Map.of("error", String.valueOf(e.getMessage()), "strategy", strategy));
+                    Map.of("error", String.valueOf(PathMask.scrub(e.getMessage())), "strategy", strategy));
             throw e;
         }
     }
@@ -153,7 +153,7 @@ public class ImageController {
             return ResponseEntity.status(er.getStatusCode()).body(Map.of("error", PathMask.scrub(String.valueOf(e.getMessage()))));
         }
         if (e instanceof org.springframework.web.method.annotation.MethodArgumentTypeMismatchException) {
-            return ResponseEntity.badRequest().body(Map.of("error", "잘못된 값입니다: " + e.getMessage()));
+            return ResponseEntity.badRequest().body(Map.of("error", "잘못된 값입니다: " + PathMask.scrub(e.getMessage())));
         }
         log.error("요청 실패", e);
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)

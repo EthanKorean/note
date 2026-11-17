@@ -160,7 +160,7 @@ public class RagController {
             return ResponseEntity.status(er.getStatusCode()).body(Map.of("error", PathMask.scrub(String.valueOf(e.getMessage()))));
         }
         if (e instanceof org.springframework.web.method.annotation.MethodArgumentTypeMismatchException) {
-            return ResponseEntity.badRequest().body(Map.of("error", "잘못된 값입니다: " + e.getMessage()));
+            return ResponseEntity.badRequest().body(Map.of("error", "잘못된 값입니다: " + PathMask.scrub(e.getMessage())));
         }
         log.error("요청 처리 실패", e);
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)

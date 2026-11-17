@@ -106,7 +106,7 @@ public class JusoController {
         }
         String msg = e instanceof IOException ? "I/O 오류: " + root.getMessage()
                 : e.getClass().getSimpleName() + ": " + root.getMessage();
-        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(Map.of("error", String.valueOf(msg)));
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(Map.of("error", PathMask.scrub(String.valueOf(msg))));
     }
 
     private static ResponseEntity<Map<String, String>> error(HttpStatus status, Exception e) {

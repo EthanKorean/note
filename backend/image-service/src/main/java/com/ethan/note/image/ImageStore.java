@@ -106,7 +106,7 @@ public class ImageStore {
                     return true;
                 } catch (IOException e) {
                     failed.incrementAndGet();
-                    firstError.compareAndSet(null, e.getMessage());
+                    firstError.compareAndSet(null, PathMask.scrub(e.getMessage())); // 웹소켓·응답으로 나가므로 경로를 가린다
                     return false;
                 }
             };

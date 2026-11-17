@@ -77,7 +77,7 @@ public class BenchRunner {
                     r.avgMs(), r.p95Ms(), r.hitRatio() * 100, r.originReads()));
             return r;
         } catch (Exception e) {
-            events.error(p.mode(), "실패: " + e.getMessage());
+            events.error(p.mode(), "실패: " + PathMask.scrub(e.getMessage())); // 웹소켓으로 나가므로 경로를 가린다
             throw e;
         } finally {
             // 실험이 바꾼 maxmemory/정책은 되돌려서 다른 사용(서비스용 주소 등)에 남지 않게 한다.

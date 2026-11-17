@@ -34,14 +34,14 @@ public class DocStore {
             throw new IllegalArgumentException("문서 폴더가 없습니다: " + PathMask.show(dir));
         }
         try (Stream<Path> files = Files.list(dir)) {
-            List<Doc> docs = files.filter(p -> p.getFileName().toString().endsWith(".md"))
+            List<Doc> docs = files.filter(p -> p.getFileName().toString().endsWith(".md") && Files.isRegularFile(p))
                     .filter(p -> !exclude.contains(p.getFileName().toString()))
                     .sorted()
                     .map(p -> {
                         try {
                             return new Doc(p.getFileName().toString(), Files.readString(p, StandardCharsets.UTF_8).replace("\r\n", "\n"));
                         } catch (IOException e) {
-                            throw new UncheckedIOException(e);
+                            throw new UncheckedIOException("문서를 읽지 못했습니다: " + p.getFileName(), e); // IOException 메시지에는 전체 경로가 들어 있다
                         }
                     })
                     .toList();
