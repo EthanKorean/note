@@ -7,7 +7,7 @@ Vue + Spring Boot로 여러 주제를 공부하고, 작은 프로젝트를 직�
 
 ```
 note/
-├── .env.example     환경변수 견본 (복사해서 .env 를 만든다. .env 는 커밋되지 않음)
+├── .env.example     비밀이 아닌 설정 견본 (init-env.sh 가 .env 로 복사한다. .env 는 커밋되지 않음)
 ├── backend/         Gradle 멀티 프로젝트 (MSA, Spring Boot 3.5 / Java 25)
 │   ├── gateway/         Spring Cloud Gateway (9203) — 모든 요청의 진입점
 │   ├── juso-service/    도로명주소 대용량 적재 API + STOMP 웹소켓 (9204)
@@ -19,7 +19,7 @@ note/
 ├── frontend/        Vue 3 + TypeScript + Pinia (Vite, 9201) — 좌측 메뉴 + 대용량 적재 화면 (e2e/ 는 Playwright 화면 테스트)
 ├── generate-data/   대용량 테스트 데이터 생성 (도로명주소 → result/202610_juso.txt)
 ├── docker/          인프라 컨테이너 모음 (mariadb, redis, 이후 mqtt/kafka 등) + manage.sh
-├── scripts/         .env 만들기, 백엔드/프론트 실행 스크립트, claude-toast 설치(claude-toast/)
+├── scripts/         .env 와 비밀번호 준비(init-env.sh, vault.sh), 백엔드/프론트 실행 스크립트, claude-toast 설치(claude-toast/)
 └── docs/            스터디 노트 (주제별 정리)
 ```
 
@@ -37,7 +37,8 @@ note/
 
 | 파일 | 위치 | 만드는 법 | 비고 |
 |---|---|---|---|
-| `.env` | 프로젝트 **루트** (`note/.env`) | `scripts/init-env.sh` 로 `.env.example` 을 복사하고 비밀번호를 직접 입력(엔터는 랜덤) | 커밋 금지(`.gitignore`). DB 계정/비밀번호, JDK 위치, 데이터 파일 경로 |
+| `.env` | 프로젝트 **루트** (`note/.env`) | `scripts/init-env.sh` 가 `.env.example` 에서 복사 | 커밋 금지(`.gitignore`). 포트, DB 이름, JDK 위치, 데이터 파일 경로 같은 **비밀이 아닌 설정만** |
+| `.secrets.enc` | 프로젝트 **루트** | `scripts/init-env.sh` (비밀번호를 입력받아 암호화해 보관) | 커밋 금지(`.gitignore`). DB/Redis 비밀번호의 암호문. 복호화 키(DEK)는 저장소 밖 `~/.config/note/dek.key` |
 | `202610_juso.txt` | `generate-data/result/` | `python3 generate-data/generate_juso.py` | 964MB, 커밋 금지. DB 컨테이너가 `/import` 로 같은 폴더를 읽는다 |
 | MariaDB 데이터 | 컨테이너 볼륨 `mariadb-data` | `docker/manage.sh up mariadb` | 최초 기동 시 `docker/mariadb/initdb/01-schema.sql` 자동 적용 |
 | 임베딩 모델 | 프로젝트 루트 `rag-data/model/` | RAG 검색 화면의 "모델 받고 준비하기" 버튼 | 커밋 금지, 재내려받기 가능(약 135MB) |
@@ -48,16 +49,58 @@ note/
 | 키 | 용도 |
 |---|---|
 | `MARIADB_PORT`, `MARIADB_DATABASE`, `MARIADB_USER` | DB 컨테이너 설정 (기본 9000, juso, note) |
-| `MARIADB_ROOT_PASSWORD`, `MARIADB_PASSWORD` | DB 컨테이너 비밀번호 — **반드시 채운다** |
-| `JUSO_DB_URL`, `JUSO_DB_USER`, `JUSO_DB_PASSWORD` | juso-service 가 접속할 DB. 비밀번호는 `MARIADB_ROOT_PASSWORD` 와 같은 값 |
+| `JUSO_DB_URL`, `JUSO_DB_USER` | juso-service 가 접속할 DB. 비밀번호는 보관한 `MARIADB_ROOT_PASSWORD` 와 같은 값(실행할 때 채운다) |
 | `JUSO_DATA_FILE` | 적재할 원본 파일(절대 경로). 비우면 `generate-data/result/202610_juso.txt` |
-| `REDIS_PORT`, `REDIS_PASSWORD` | Redis 컨테이너와 image-service 접속 정보 (기본 포트 9001) — 비밀번호는 **반드시 채운다** |
+| `REDIS_PORT` | Redis 컨테이너와 image-service 접속 포트 (기본 9001) |
 | `IMAGE_DIR` | 상품 이미지 폴더(절대 경로). 비우면 `image-data/` |
 | `IMAGE_SAMPLE_URL`, `IMAGE_SAMPLE_THREADS` | (선택) "샘플 사진 받기" 주소 템플릿과 동시 다운로드 수. 기본은 picsum.photos, 8개 |
 | `RAG_DOCS_DIR`, `RAG_MODEL_DIR`, `RAG_DOCS_EXCLUDE` | (선택) RAG 검색 대상 문서 폴더, 모델 저장 폴더, 검색 대상에서 뺄 파일. 비우면 `docs/`(바로 아래 *.md 만), `rag-data/model/`, 제외 없음 |
 | `JAVA_HOME` | `java` 가 PATH 에 없을 때 JDK 25 위치 |
 
 코드와 설정 파일(`application.yml`, `docker-compose.yml`)에는 비밀번호를 적지 않습니다. 비어 있으면 실행이 중단됩니다.
+
+### 비밀번호 (암호화해 보관)
+
+비밀번호(MariaDB root, 서비스 계정, Redis)는 `.env` 에 평문으로 두지 않습니다. `scripts/init-env.sh` 가 숨김 입력으로 받아(엔터만 치면 그 항목만 랜덤) **DEK(데이터 암호화 키)로 암호화**해 `.secrets.enc` 에 보관하고(`scripts/lib/vault.sh`), `scripts/run-backend.sh` 와 `docker/manage.sh` 가 **실행할 때만** 풀어서 프로세스 환경변수로 넘깁니다.
+
+| | |
+|---|---|
+| 암호문 | `.secrets.enc` (git 제외). 폴더를 통째로 올리거나 공유해도 암호문만 나간다 |
+| DEK | **저장소 밖** `~/.config/note/dek.key` (권한 600). 처음 쓸 때 `openssl rand` 로 만든다. 잃으면 암호문을 풀 수 없다 |
+| 알고리즘 | OpenSSL AES-256-CBC + PBKDF2(200000회, salt). 첫 줄 매직 문자열로 키가 맞는지 확인해서 틀린 DEK/손상된 파일은 거부한다 |
+| 보관하는 값 | `MARIADB_ROOT_PASSWORD`, `MARIADB_PASSWORD`, `REDIS_PASSWORD`. `JUSO_DB_PASSWORD` 는 root 비밀번호와 같은 값이라 따로 보관하지 않고 실행할 때 채운다 |
+| 규칙 | 8자 이상, ASCII, `' " \ $` 백틱 공백 제외 |
+
+**한계(감수한 것):** DEK 를 읽을 수 있는 사람은 비밀번호도 읽을 수 있다. DEK 가 노출되면 소용없다. **로컬 개발용 비밀번호에만** 쓰고 운영 비밀은 넣지 않는다. 컨테이너가 실행되는 동안 값은 컨테이너 환경에 존재한다(`docker inspect` 로 보임).
+
+```bash
+scripts/init-env.sh                # 없는 비밀번호만 입력받아 보관 (몇 번 실행해도 안전)
+scripts/init-env.sh --random       # 묻지 않고 없는 비밀번호를 전부 랜덤으로
+scripts/init-env.sh --ask          # 보관된 값을 쓰지 않고 새로 입력 (이미 만든 DB/Redis 볼륨은 예전 비밀번호를 기억하므로 docker/manage.sh destroy 로 지운 뒤 다시 up)
+scripts/vault.sh list              # 보관된 키 이름 (값은 출력하지 않음)
+scripts/vault.sh get REDIS_PASSWORD   # 복호화한 값 출력 (화면·로그에 남기지 말 것)
+scripts/vault.sh set | delete KEY | path
+scripts/test-vault.sh              # 보관함 시험(임시 폴더에서만 동작). /bin/bash 로 실행하면 macOS bash 3.2 호환 확인
+scripts/test-init-env.sh           # init-env.sh(평문 이전, 충돌, 규칙 위반, --ask 등)와 load_secrets_env 시험(임시 폴더에서만 동작)
+```
+
+환경변수(`MARIADB_ROOT_PASSWORD` 등)로 직접 지정한 값은 보관함보다 우선합니다. `run-backend.sh` 는 `.env` 를 먼저 읽으므로 `.env` 에 남은 평문 값도 보관함보다 우선합니다(그래서 이전 버전 사용자는 `init-env.sh` 로 정리하세요).
+
+#### ⚠️ 이전 버전을 받아 쓰던 경우: `git pull` 후 초기화를 한 번 다시 실행하세요
+
+이전 버전은 비밀번호를 `.env` 에 **평문**으로 적었습니다. 이 버전부터는 암호화해 `.secrets.enc` 에 보관하고 `.env` 에는 두지 않습니다. 이전 버전으로 받아 쓰던 컴퓨터에서 `git pull` 했다면 **초기화(`init-env.sh`)를 한 번 다시** 실행해야 합니다.
+
+```bash
+git pull
+scripts/init-env.sh      # 보통 입력할 것 없음. .env 의 평문 비밀번호를 그대로 암호화해 보관하고 .env 에서 지운다(.env 에 없던 비밀번호가 있으면 그것만 묻는다)
+```
+
+- **값은 바뀌지 않습니다.** 이미 만든 MariaDB/Redis 컨테이너가 그 비밀번호를 쓰고 있으므로 같은 값을 옮길 뿐이고, DB/Redis 를 다시 만들 필요가 없습니다.
+- 옮긴 값은 다시 읽어 같은지 확인한 뒤에만 `.env` 에서 지웁니다. 보관함의 값과 `.env` 의 값이 다르면 아무것도 지우지 않고 알려 줍니다.
+- **안 하면:** 동작은 하지만(`.env` 의 평문 값을 그대로 씁니다) `run-backend.sh`/`manage.sh` 가 실행할 때마다 `[경고] .env 에 평문 비밀번호가 남아 있습니다` 라고 알립니다.
+- 이전에 8자 미만이거나 규칙에 맞지 않는 비밀번호를 썼다면 그 값은 옮기지 않고 `.env` 에 그대로 둡니다(경고가 나오고, 동작은 계속 됩니다). 새 값을 만들어 보관하지도 않습니다. 규칙에 맞게 바꾸려면 `.env` 의 값을 규칙에 맞는 새 값으로 고치고 DB/Redis 볼륨을 그 값으로 다시 만든 뒤(`docker/manage.sh destroy` → `up`) `scripts/init-env.sh` 를 실행하세요(새 값이 보관함으로 옮겨지고 `.env` 에서 지워집니다).
+- 손으로 고친 `.env` 의 `KEY="값"`(따옴표), `export KEY=값`, 앞 공백, 공백 뒤 `# 메모`, CRLF 줄바꿈, 줄 끝 공백은 `bash`/`docker compose` 가 읽는 값 그대로 벗겨서 옮깁니다. 같은 키가 여러 줄이면 마지막 줄이 쓰이는 값이므로 그 값을 옮기고 모든 줄을 지웁니다.
+- `.env` 가 없거나 비밀번호가 없는 새 컴퓨터는 그냥 `scripts/init-env.sh` 로 입력하면 됩니다.
 
 ## 실행 방법
 
@@ -71,15 +114,15 @@ colima start
 ```
 
 ```bash
-# 0) 처음 한 번: .env 만들고 비밀번호 채우기, 데이터 준비
-scripts/init-env.sh                       # note/.env 생성 → 비밀번호를 물어봄 (엔터는 랜덤, 전부 랜덤은 --random)
+# 0) 처음 한 번: .env 만들고 비밀번호 보관, 데이터 준비
+scripts/init-env.sh                       # note/.env 생성 → 비밀번호를 물어봐 암호화해 보관 (엔터는 랜덤, 전부 랜덤은 --random). 이전 버전에서 pull 했다면 이것만 한 번 더 실행
 python3 generate-data/generate_juso.py    # generate-data/result/202610_juso.txt
 
 # 1) DB (mariadb: localhost:9000, DB juso), 캐시(redis: localhost:9001)
 docker/manage.sh up mariadb
 docker/manage.sh up redis                 # 이미지 캐싱 화면에서만 필요
 
-# 2) 백엔드 — 터미널을 나눠 각각 실행 (.env 를 읽어 환경변수로 넘겨 줌)
+# 2) 백엔드 — 터미널을 나눠 각각 실행 (.env 의 설정과 보관한 비밀번호를 환경변수로 넘겨 줌)
 scripts/run-backend.sh juso               # http://localhost:9204
 scripts/run-backend.sh image              # http://localhost:9205 (이미지 캐싱 화면에서만 필요)
 scripts/run-backend.sh catch              # http://localhost:9206 (캐치마인드 화면에서만 필요)
@@ -180,12 +223,12 @@ docker/manage.sh destroy mariadb    # 데이터까지 삭제
 docker/manage.sh list               # 사용 가능한 서비스 목록
 ```
 
-- 새 서비스는 `docker/<이름>/docker-compose.yml` 만 만들면 `manage.sh` 로 바로 다룰 수 있습니다. 비밀번호 같은 값은 루트 `.env` 에 추가합니다.
+- 새 서비스는 `docker/<이름>/docker-compose.yml` 만 만들면 `manage.sh` 로 바로 다룰 수 있습니다. 비밀번호는 보관함(`scripts/vault.sh set <키>`, 키는 `scripts/lib/secrets.sh` 의 `SECRET_KEYS`)에, 포트 같은 비밀이 아닌 설정은 루트 `.env` 에 추가합니다.
 - DB를 만들 때는 항상 `schema.sql` 을 함께 둡니다. (mariadb: `docker/mariadb/initdb/01-schema.sql`, 최초 기동 시 자동 적용)
 - podman 에뮬레이션 환경에서는 `manage.sh` 가 사용자용 소켓(`/run/user/$(id -u)/podman/podman.sock`)을 자동으로 씁니다.
 
 ## 규칙
 
 - 주제 하나당 `docs/<주제>.md` 에 핵심 개념, 실습 과정, 막혔던 점을 기록합니다. 분야가 정해진 노트는 하위 폴더에 둡니다(AX: `docs/ax/`, DB: `docs/db/`). RAG 는 `docs/` 바로 아래 *.md 만 읽으므로 하위 폴더 노트는 검색 대상이 아닙니다.
-- 비밀번호·회사 내부 코드·민감한 정보는 올리지 않습니다. 값은 `.env` 에만 둡니다.
+- 비밀번호·회사 내부 코드·민감한 정보는 올리지 않습니다. 비밀이 아닌 설정은 `.env` 에, 비밀번호는 암호화 보관함(`.secrets.enc`)에만 둡니다.
 - 새 화면은 대용량 적재 페이지 포맷을 따릅니다 (`CLAUDE.md` 참고).

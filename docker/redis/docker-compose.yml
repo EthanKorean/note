@@ -11,7 +11,7 @@ services:
     command:
       - redis-server
       - --requirepass
-      - ${REDIS_PASSWORD:?루트의 .env 에 REDIS_PASSWORD 를 채우세요}
+      - ${REDIS_PASSWORD:?scripts/init-env.sh 로 REDIS_PASSWORD 를 보관한 뒤 docker/manage.sh 로 실행하세요}
       - --save
       - ""
       - --appendonly

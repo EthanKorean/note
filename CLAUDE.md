@@ -29,10 +29,11 @@
 ## 프로젝트 셋팅 ("프로젝트 구성 셋팅해줘")
 처음 받은 컴퓨터에서 이 요청을 받으면 아래 순서로 진행한다. 각 단계는 이미 되어 있으면 건너뛴다.
 1. **환경 확인**: OS(`uname -s`), JDK 25, Node 18+, docker. 없으면 설치 방법(macOS는 `brew install colima docker docker-compose` 후 `colima start`)을 말하고 설치 전에 사용자에게 확인한다.
-2. **`.env`**: 비밀번호는 **절대 임의로 정하지 않는다.** 사용자에게 `MARIADB_ROOT_PASSWORD`, `MARIADB_PASSWORD`, `REDIS_PASSWORD`를 직접 정할지, 랜덤으로 만들지 묻는다.
-   - 직접 입력: 사용자가 `! scripts/init-env.sh`를 실행하게 한다. 비밀번호가 대화에 남지 않는다.
-   - 랜덤: 사용자가 원한다고 답했을 때만 `scripts/init-env.sh --random`을 실행하고, 값은 `.env`에 있다고 알려 준다.
-   - 비밀번호는 영문, 숫자, `_ . @ % + -` 만 쓴다. 이미 `.env`가 있으면 건드리지 않는다.
+2. **비밀번호**: **절대 임의로 정하지 않는다.** 사용자에게 `MARIADB_ROOT_PASSWORD`, `MARIADB_PASSWORD`, `REDIS_PASSWORD`를 직접 정할지, 랜덤으로 만들지 묻는다. 값은 `.env` 가 아니라 DEK 로 암호화한 보관함(`.secrets.enc`)에 들어간다.
+   - 직접 입력: 사용자가 `! scripts/init-env.sh`를 실행하게 한다(숨김 입력, 엔터는 항목별 랜덤). 비밀번호가 대화에 남지 않는다.
+   - 랜덤: 사용자가 원한다고 답했을 때만 `scripts/init-env.sh --random`을 실행하고, 값은 `scripts/vault.sh get <키>` 로 볼 수 있다고 알린다.
+   - 이전 버전(`.env` 에 평문 비밀번호)에서 `git pull` 한 컴퓨터는 `scripts/init-env.sh` 를 **한 번 다시 실행**하게 안내한다. 입력할 것 없이 기존 값을 그대로 보관함으로 옮기고 `.env` 에서 지운다(DB/Redis 를 다시 만들 필요 없음).
+   - 비밀번호는 8자 이상, ASCII, `' " \ $` 백틱 공백을 쓰지 않는다. `.env` 는 비밀이 아닌 설정만 둔다.
 3. **인프라**: `docker/manage.sh up mariadb` (이미지 캐싱을 쓰면 `up redis`도). healthy가 되는지 확인한다.
 4. **데이터**: `generate-data/result/202610_juso.txt`(약 964MB)가 없으면, 내려받는 용량을 알리고 확인을 받은 뒤 `python3 generate-data/generate_juso.py`를 실행한다.
 5. **빌드 확인**: `scripts/run-backend.sh`로 서비스가 뜨는지, 프론트는 `scripts/run-frontend.sh`(최초 `npm install`)로 확인한다.
@@ -48,3 +49,14 @@
 - 새 화면을 추가하면 `frontend/e2e/pages.spec.ts` 의 `pages` 목록에 넣고, 화면 고유 동작은 `e2e/<화면>.spec.ts` 로 테스트를 더한다.
 - 모양을 바꿨으면 `frontend/test-results/screens/` 의 스크린샷을 Read 로 열어 라이트·다크(필요하면 좁은 화면)를 직접 본다. 애니메이션 도중에 재거나 찍으면 어긋나므로 `reducedMotion: 'reduce'` 로 고정한다.
 - 테스트는 데이터를 바꾸는 버튼(적재, 삭제 등)을 누르지 않는다. 단, DB 락 전략 화면의 실험 실행은 연습용 `lock_*` 테이블만 바꾸고 기록만 쌓으므로 눌러도 된다("기록 지우기"와 기록 DELETE 는 누르지 않는다). 실행하려면 백엔드와 toast-service 가 떠 있어야 한다.
+
+## 비밀번호 보관함(vault) 사용 규칙
+- 구조: 암호문 `.secrets.enc`(git 제외) + 저장소 밖 DEK(`~/.config/note/dek.key`). 모듈은 `scripts/lib/vault.sh`, 규칙과 환경변수 연결은 `scripts/lib/secrets.sh`, 명령은 `scripts/vault.sh`, 시험은 `scripts/test-vault.sh`. 자세한 설명은 README 의 "비밀번호" 절.
+- `run-backend.sh` 와 `docker/manage.sh` 가 실행할 때만 복호화해 환경변수로 넘긴다. 값을 출력하거나 로그·대화·커밋에 남기지 않는다(`vault.sh get` 결과를 그대로 보여 주지 않는다). 값이 필요 없는 확인은 `vault.sh list` 로 한다.
+- `.secrets.enc` 와 DEK 파일은 내용을 읽어 보여 주거나 복사·이동하지 않는다. 운영용 비밀은 넣지 않는다. DEK 가 노출되면 소용없다는 한계는 의도적으로 감수한 것이다.
+- 새 비밀번호가 필요한 서비스를 추가하면 `scripts/lib/secrets.sh` 의 `SECRET_KEYS`, `scripts/init-env.sh` 의 `label_of`, `scripts/vault.sh` 의 키 검사를 함께 고친다.
+- `scripts/lib/vault.sh` 를 고치면 `scripts/test-vault.sh` 를, `scripts/init-env.sh` 나 `scripts/lib/secrets.sh` 를 고치면 `scripts/test-init-env.sh` 도, 기본 bash 와 `/bin/bash`(macOS 3.2) 둘 다로 돌려 모두 통과하는지 확인한다. 이전(migration) 흐름은 값을 잃을 수 있으므로 시험 없이 고치지 않는다.
+
+## 코드 리뷰
+- 커밋·푸시 전에는 항상 코드 리뷰를 한다(`/code-review`). 수정할 것이 안 나올 때까지 반복하고, 리뷰가 실행하지 않았다고 한 검증은 직접 돌려서 확인한다.
+- 초기화·설정 방식이 바뀌어 **이전 버전을 받아 쓰던 사람이 `git pull` 뒤에 해야 할 일**이 생기면, README 에 "이전 버전에서 업데이트" 안내를 적고 스크립트가 직접 알려 주게 한다.

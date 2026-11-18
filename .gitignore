@@ -44,3 +44,6 @@ frontend/playwright-report/
 # Python 캐시
 __pycache__/
 *.pyc
+
+# 암호화해 보관한 비밀번호(DEK 는 저장소 밖 ~/.config/note/dek.key)
+.secrets.enc*

@@ -8,10 +8,10 @@ services:
     ports:
       - "${MARIADB_PORT:?루트의 .env 가 필요합니다 (scripts/init-env.sh)}:3306"
     environment:
-      MARIADB_ROOT_PASSWORD: ${MARIADB_ROOT_PASSWORD:?루트의 .env 에 MARIADB_ROOT_PASSWORD 를 채우세요}
+      MARIADB_ROOT_PASSWORD: ${MARIADB_ROOT_PASSWORD:?scripts/init-env.sh 로 MARIADB_ROOT_PASSWORD 를 보관한 뒤 docker/manage.sh 로 실행하세요}
       MARIADB_DATABASE: ${MARIADB_DATABASE:-juso}
       MARIADB_USER: ${MARIADB_USER:-note}
-      MARIADB_PASSWORD: ${MARIADB_PASSWORD:?루트의 .env 에 MARIADB_PASSWORD 를 채우세요}
+      MARIADB_PASSWORD: ${MARIADB_PASSWORD:?scripts/init-env.sh 로 MARIADB_PASSWORD 를 보관한 뒤 docker/manage.sh 로 실행하세요}
       TZ: Asia/Seoul
     command:
       - --character-set-server=utf8mb4

@@ -13,12 +13,16 @@
 
 set -euo pipefail
 cd "$(dirname "$0")"
-# 비밀번호 같은 값은 프로젝트 루트의 .env 에 둔다(커밋되지 않음). 없으면 scripts/init-env.sh 로 만든다.
+# 포트 같은 비밀이 아닌 설정은 프로젝트 루트의 .env 에, 비밀번호는 암호화해 보관한 .secrets.enc 에 있다(둘 다 커밋되지 않음).
+# 없으면 scripts/init-env.sh 가 만든다. 비밀번호는 여기서 풀어 프로세스 환경변수로만 compose 에 넘긴다.
 ENV_FILE="$(cd .. && pwd)/.env"
 if [[ ! -f "$ENV_FILE" ]]; then
-  echo "루트에 .env 가 없습니다. 먼저 scripts/init-env.sh 를 실행하고 비밀번호를 채우세요." >&2
+  echo "루트에 .env 가 없습니다. 먼저 scripts/init-env.sh 를 실행하세요." >&2
   exit 1
 fi
+source "$(cd .. && pwd)/scripts/lib/secrets.sh"
+warn_plaintext_env "$ENV_FILE"   # 이전 버전의 평문 비밀번호가 남아 있으면 알린다
+load_secrets_env                 # 암호화해 보관한 비밀번호를 환경변수로 (이미 환경에 있는 값은 유지)
 # compose 가 비밀번호 없이 뜨지 않도록 서비스별로 필요한 값을 미리 확인한다.
 required_env() { # required_env <서비스>
   case "$1" in
@@ -27,11 +31,13 @@ required_env() { # required_env <서비스>
     *)       echo "" ;;
   esac
 }
+# 값이 있는가: 환경변수(보관함에서 올린 비밀번호 포함) 또는 .env 의 설정
+env_has() { [[ -n "${!1:-}" || -n "$(env_file_value "$ENV_FILE" "$1")" ]]; }
 check_env() { # check_env <서비스>
   local v
   for v in $(required_env "$1"); do
-    if ! grep -Eq "^${v}=.+" "$ENV_FILE"; then
-      echo ".env 의 $v 값이 비어 있습니다. 채운 뒤 다시 실행하세요." >&2
+    if ! env_has "$v"; then
+      echo "$v 값이 없습니다. scripts/init-env.sh 를 실행해 비밀번호를 보관했는지(또는 .env 의 설정인지) 확인하세요." >&2
       exit 1
     fi
   done
@@ -67,7 +73,7 @@ compose() { # compose <서비스> <인자...>
   if [[ "${1:-}" != "up" ]]; then
     local v
     for v in $(required_env "$svc"); do
-      grep -Eq "^${v}=.+" "$ENV_FILE" || { [[ "$v" == *PORT ]] && export "$v=0" || export "$v=unused"; }
+      env_has "$v" || { [[ "$v" == *PORT ]] && export "$v=0" || export "$v=unused"; }
     done
   fi
   (cd "$svc" && "${COMPOSE[@]}" --env-file "$ENV_FILE" "$@")
