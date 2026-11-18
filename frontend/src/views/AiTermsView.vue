@@ -45,7 +45,7 @@ const sections = [
                 <span class="tag st-idea">나중에</span> 아이디어
               </td>
             </tr>
-            <tr><th scope="row">기록</th><td>측정 결과와 느낀 점은 docs/rag.md에 남겼다</td></tr>
+            <tr><th scope="row">기록</th><td>측정 결과와 느낀 점은 docs/ax/rag.md에 남겼다</td></tr>
             <tr><th scope="row">쉬운 예시</th><td>모든 용어를 해든 카페 안내 챗봇 하나로 설명한다. "쉬운 예제 보기" 버튼이 있는 용어 {{ demoCount }}개는 코드까지 볼 수 있다(Claude 예제는 API 키가 없어 실행해 보지 않았다)</td></tr>
             <tr><th scope="row">프로젝트에서는</th><td>카페 설명과 세부가 다를 때만 적는다. 이 노트 프로젝트에서 실제로 쓴 모델, 측정 결과, 아직 안 한 것이다. RAG 검색 화면과 이어진다</td></tr>
             <tr><th scope="row"><span class="star">★ 표시</span></th><td>먼저 알아야 할 핵심 용어 {{ coreCount }}개(전체 {{ totalCount }}개). 나머지는 필요할 때 찾아보는 용도다</td></tr>

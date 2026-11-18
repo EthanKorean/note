@@ -1,0 +1,6 @@
+dependencies {
+    implementation 'org.springframework.boot:spring-boot-starter-web'
+    implementation 'org.springframework.boot:spring-boot-starter-websocket'   // 진행 메시지(STOMP)
+    implementation 'org.springframework.boot:spring-boot-starter-jdbc'         // 트랜잭션을 JDBC 로 직접 다룬다(락 동작을 그대로 보려고)
+    runtimeOnly 'org.mariadb.jdbc:mariadb-java-client'
+}

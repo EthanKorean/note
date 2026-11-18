@@ -13,26 +13,34 @@ onMounted(() => toast.connect()) // claude-toast 알림은 어느 화면에서�
 const KEY = 'note.menu.collapsed'
 function load(): Record<string, boolean> {
   try {
-    return JSON.parse(localStorage.getItem(KEY) ?? '{}')
+    const v: unknown = JSON.parse(localStorage.getItem(KEY) ?? '{}')
+    if (typeof v !== 'object' || v === null || Array.isArray(v)) return {} // 모양이 다른 값(null, 숫자 등)이 들어 있어도 화면이 깨지지 않게
+    return Object.fromEntries(Object.entries(v).filter(([, x]) => typeof x === 'boolean')) as Record<string, boolean>
   } catch {
     return {}
   }
 }
 const collapsed = reactive<Record<string, boolean>>(load())
-function toggle(title: string) {
-  collapsed[title] = !collapsed[title]
+function save() {
   try {
     localStorage.setItem(KEY, JSON.stringify(collapsed))
   } catch {
     /* 저장 실패해도 화면은 동작한다 */
   }
 }
+function toggle(title: string) {
+  collapsed[title] = !collapsed[title]
+  save()
+}
 const route = useRoute()
 watch(
   () => route.path,
   (path) => {
     const g = menu.find((m) => m.items.some((i) => i.path === path))
-    if (g?.title) collapsed[g.title] = false
+    if (g?.title && collapsed[g.title]) {
+      collapsed[g.title] = false
+      save() // 자동으로 펼친 것도 저장한다(저장하지 않으면 다음에 다른 그룹을 눌러 저장할 때 이 변경만 슬쩍 반영된다)
+    }
   },
   { immediate: true },
 )

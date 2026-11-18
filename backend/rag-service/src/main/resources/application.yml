@@ -13,11 +13,12 @@ spring:
       maximum-pool-size: 2
 
 rag:
-  # 검색 대상 문서 폴더(*.md). 기본값은 bootRun 작업 디렉토리(backend/rag-service) 기준으로 프로젝트의 docs/.
+  # 검색 대상 문서 폴더(*.md, 하위 폴더는 읽지 않는다). 기본값은 bootRun 작업 디렉토리(backend/rag-service) 기준으로 프로젝트의 docs/.
+  # 이 실험을 설명하는 노트(docs/ax/rag.md)는 정답 문구를 그대로 담고 있어서 말뭉치에 들어가면 평가가 순환한다.
+  # 그래서 AX 노트는 docs/ax/, DB 노트는 docs/db/ 처럼 하위 폴더에 두고 docs/ 바로 아래에는 말뭉치 문서만 둔다.
   docs-dir: ${RAG_DOCS_DIR:../../docs}
-  # 검색 대상에서 뺄 파일 이름(쉼표로 구분). 이 실험을 설명하는 문서(rag.md)는 정답 문구를 그대로 담고 있어서
-  # 대상에 넣으면 평가가 순환하고, 문서에 적은 숫자도 화면에서 재현되지 않는다.
-  docs-exclude: ${RAG_DOCS_EXCLUDE:rag.md}
+  # 검색 대상에서 뺄 파일 이름(쉼표로 구분). 기본은 없음.
+  docs-exclude: ${RAG_DOCS_EXCLUDE:}
   # 임베딩 모델을 내려받아 두는 폴더(커밋되지 않음, 약 135MB).
   model-dir: ${RAG_MODEL_DIR:../../rag-data/model}
   # 다국어(한국어 포함) 임베딩 모델 multilingual-e5-small 의 양자화 ONNX. 바꾸려면 같은 구조의 저장소 주소를 넣는다.

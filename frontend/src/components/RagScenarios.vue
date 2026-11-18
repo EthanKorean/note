@@ -182,8 +182,6 @@ const queueLabel = computed(() => (queue.value.current ? chunkerLabel(queue.valu
 .scn-btn { min-width: 96px; }
 .scn-table { margin-top: 10px; }
 .scn-foot { align-items: center; gap: 12px; }
-.st-done { background: var(--accent); color: var(--accent-text); }
-.st-todo { background: transparent; color: var(--muted); border: 1px dashed var(--border); }
 .try-list { list-style: none; margin: 10px 0 0; padding: 0; display: flex; flex-direction: column; gap: 10px; }
 .try-list li { display: flex; flex-direction: column; gap: 4px; align-items: flex-start; font-size: 1rem; }
 .try-list button { text-align: left; }

@@ -15,7 +15,7 @@
 - **스타일**: 색은 `style.css`의 CSS 토큰(라이트/다크)만 쓴다.
 
 ## 환경
-- 포트는 모두 9000번대 (MariaDB 9000, Redis 9001, Vite 9201, gateway 9203, juso-service 9204, image-service 9205, catch-service 9206, rag-service 9207, toast-service 9208). 8000번대는 다른 프로젝트가 쓴다.
+- 포트는 모두 9000번대 (MariaDB 9000, Redis 9001, Vite 9201, gateway 9203, juso-service 9204, image-service 9205, catch-service 9206, rag-service 9207, toast-service 9208, lock-service 9209). 8000번대는 다른 프로젝트가 쓴다.
 - 컴퓨터마다 다른 경로는 코드나 문서에 적지 않고 변수로 둔다. Ubuntu와 macOS 둘 다 스크립트(`scripts/`, `docker/manage.sh`)가 처리한다.
   - JDK 25: `.env`의 `JAVA_HOME`. 비워 두면 `scripts/lib/platform.sh`가 OS별로 자동 탐색한다(macOS는 `java_home`, Linux는 `~/.jdks`·`/usr/lib/jvm`).
   - docker: Ubuntu는 podman이라 `manage.sh`가 사용자 소켓(`/run/user/$(id -u)/podman/podman.sock`)을 자동으로 쓴다. macOS는 colima(`colima start`).
@@ -41,10 +41,10 @@
 ## claude-toast (작업 알림)
 - 작업이 끝났거나 확인이 필요하다는 알림은 Claude Code 훅(`Stop`, `Notification`)이 자동으로 보낸다. 모델이 직접 보낼 필요는 없다. 구조·설치·사용법은 README 의 "claude-toast" 절.
 - 서버(`toast-service`, 9208)는 launchd/systemd 로 상시 동작하고, 실행 파일은 `~/.local/share/claude-toast/` 에 복사돼 있다. `backend/toast-service` 나 `scripts/claude-toast/` 를 고치면 `scripts/claude-toast/install.sh` 를 다시 실행해야 반영된다.
-- `docs/*.md` 는 RAG 검색 대상이다. 스터디 노트가 아닌 문서(알림 설명 등)를 넣으면 검색과 평가 결과가 바뀌므로 README 에 쓴다.
+- `docs/` 바로 아래 `*.md` 는 RAG 검색 대상(말뭉치)이다. 하위 폴더는 읽지 않는다. 새 노트는 분야 폴더에 둔다(AX: `docs/ax/`, DB: `docs/db/`). `docs/` 바로 아래에 넣으면 조각 수와 평가 결과가 바뀌어 `docs/ax/rag.md` 의 숫자를 재현할 수 없다. 스터디 노트가 아닌 문서(알림 설명 등)는 README 에 쓴다.
 
 ## 화면 검증 (Playwright)
 - 웹 화면을 만들거나 고치면 빌드(`npm run build`)만 보지 말고 Playwright 로 검증한다: `cd frontend && npm run e2e`. 사용법과 테스트 구성은 README 의 "화면 테스트" 절.
 - 새 화면을 추가하면 `frontend/e2e/pages.spec.ts` 의 `pages` 목록에 넣고, 화면 고유 동작은 `e2e/<화면>.spec.ts` 로 테스트를 더한다.
 - 모양을 바꿨으면 `frontend/test-results/screens/` 의 스크린샷을 Read 로 열어 라이트·다크(필요하면 좁은 화면)를 직접 본다. 애니메이션 도중에 재거나 찍으면 어긋나므로 `reducedMotion: 'reduce'` 로 고정한다.
-- 테스트는 데이터를 바꾸는 버튼(적재, 삭제 등)을 누르지 않는다. 실행하려면 백엔드와 toast-service 가 떠 있어야 한다.
+- 테스트는 데이터를 바꾸는 버튼(적재, 삭제 등)을 누르지 않는다. 단, DB 락 전략 화면의 실험 실행은 연습용 `lock_*` 테이블만 바꾸고 기록만 쌓으므로 눌러도 된다("기록 지우기"와 기록 DELETE 는 누르지 않는다). 실행하려면 백엔드와 toast-service 가 떠 있어야 한다.

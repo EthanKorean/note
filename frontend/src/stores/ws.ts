@@ -64,12 +64,13 @@ export const useWsStore = defineStore('ws', () => {
   }
 
   /**
-   * 이미지 캐시, RAG 서비스의 메시지는 그 화면을 처음 열 때 연결한다. 모든 화면에서 미리 열어 두면 해당 서비스가 꺼져 있는 동안
+   * 이미지 캐시, RAG, 락 실험 서비스의 메시지는 그 화면을 처음 열 때 연결한다. 모든 화면에서 미리 열어 두면 해당 서비스가 꺼져 있는 동안
    * 3초마다 연결에 실패하는 요청이 탭이 열려 있는 내내 반복된다.
    */
   const topics = {
     image: { path: '/ws-image', topic: '/topic/image' },
     rag: { path: '/ws-rag', topic: '/topic/rag' },
+    lock: { path: '/ws-lock', topic: '/topic/lock' },
   } as const
   const opened = new Set<string>()
   function connectTopic(name: keyof typeof topics) {

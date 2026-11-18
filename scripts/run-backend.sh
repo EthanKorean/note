@@ -5,6 +5,7 @@
 #   scripts/run-backend.sh catch     catch-service (9206, 캐치마인드)
 #   scripts/run-backend.sh image     image-service (9205, Redis 필요: docker/manage.sh up redis)
 #   scripts/run-backend.sh rag       rag-service (9207, 처음 한 번 화면에서 모델 내려받기)
+#   scripts/run-backend.sh lock      lock-service (9209, 락 전략 실험. 시작할 때 lock_* 테이블을 만든다. 기록 목록은 juso-service 가 읽는다)
 #   scripts/run-backend.sh toast     toast-service (9208, claude-toast. 상시 설치는 scripts/claude-toast/install.sh)
 # 터미널을 하나씩 열어 각각 실행한다. DB 는 먼저 docker/manage.sh up mariadb 로 켠다.
 set -euo pipefail
@@ -34,6 +35,10 @@ case "${1:-}" in
              [[ -n "${!v:-}" ]] || { echo ".env 의 $v 가 비어 있습니다." >&2; exit 1; }
            done
            cd "$ROOT/backend" && exec ./gradlew :rag-service:bootRun ;;
+  lock)    for v in JUSO_DB_URL JUSO_DB_USER JUSO_DB_PASSWORD; do
+             [[ -n "${!v:-}" ]] || { echo ".env 의 $v 가 비어 있습니다." >&2; exit 1; }
+           done
+           cd "$ROOT/backend" && exec ./gradlew :lock-service:bootRun ;;
   toast)   cd "$ROOT/backend" && exec ./gradlew :toast-service:bootRun ;;
-  *)       sed -n '2,9p' "$0" | sed 's/^# \{0,1\}//'; exit 1 ;;
+  *)       sed -n '2,10p' "$0" | sed 's/^# \{0,1\}//'; exit 1 ;;
 esac

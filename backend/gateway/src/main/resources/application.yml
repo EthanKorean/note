@@ -26,6 +26,11 @@ spring:
           uri: http://localhost:9207
           predicates:
             - Path=/api/rag/**
+        # /api/lock/** 요청을 lock-service(9209)로 전달
+        - id: lock-service
+          uri: http://localhost:9209
+          predicates:
+            - Path=/api/lock/**
         # 범용 테스트 결과 API (현재는 juso-service가 제공)
         - id: test-results
           uri: http://localhost:9204
@@ -46,6 +51,11 @@ spring:
           uri: ws://localhost:9207
           predicates:
             - Path=/ws-rag/**
+        # 락 전략 실험 진행 알림(STOMP)
+        - id: lock-ws
+          uri: ws://localhost:9209
+          predicates:
+            - Path=/ws-lock/**
         # 캐치마인드 STOMP 웹소켓
         - id: catch-ws
           uri: ws://localhost:9206

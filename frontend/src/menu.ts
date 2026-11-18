@@ -16,7 +16,10 @@ export const menu: MenuGroup[] = [
   { title: '', items: [{ path: '/', label: '홈' }] },
   {
     title: 'DB',
-    items: [{ path: '/bulk-insert', label: '대용량 적재', desc: '도로명주소 642만 건 INSERT 비교' }],
+    items: [
+      { path: '/bulk-insert', label: '대용량 적재', desc: '도로명주소 642만 건 INSERT 비교' },
+      { path: '/lock', label: 'DB 락 전략', desc: '쇼핑몰 주문으로 초과 판매·데드락 재현과 락 전략 비교' },
+    ],
   },
   {
     title: '캐시',

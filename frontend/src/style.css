@@ -361,6 +361,8 @@ tr.best td:first-child { box-shadow: inset 3px 0 0 var(--accent); }
 .tag.best-tag { background: var(--accent); color: var(--accent-text); font-weight: 700; }
 tr.worst td { background: color-mix(in srgb, var(--danger) 9%, transparent); }
 tr.worst td:first-child { box-shadow: inset 3px 0 0 var(--danger); }
+.tag.st-done { background: var(--accent); color: var(--accent-text); }
+.tag.st-todo { background: transparent; color: var(--muted); border: 1px dashed var(--border); }
 .tag.worst-tag { background: var(--danger); color: var(--accent-text); font-weight: 700; }
 .cond { color: var(--muted); font-size: 1rem; white-space: nowrap; }
 .rank { font-weight: 600; width: 3em; }

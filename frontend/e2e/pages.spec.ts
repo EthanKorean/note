@@ -6,6 +6,7 @@ const pages = [
   { path: '/image-cache', h1: '이미지 캐싱', title: '이미지 캐싱 · Note' },
   { path: '/ai-terms', h1: 'AI 용어 정리', title: 'AI 용어 정리 · Note' },
   { path: '/rag', h1: 'RAG 검색', title: 'RAG 검색 · Note' },
+  { path: '/lock', h1: 'DB 락 전략', title: 'DB 락 전략 · Note' },
   { path: '/suika', h1: '수박 게임', title: '수박 게임 · Note' },
   { path: '/catch', h1: '캐치마인드', title: '캐치마인드 · Note' },
 ]

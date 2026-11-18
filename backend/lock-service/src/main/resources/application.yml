@@ -1,0 +1,22 @@
+server:
+  port: 9209
+
+spring:
+  application:
+    name: lock-service
+  datasource:
+    # 실험 테이블(lock_*)과 결과(test_result)를 juso-service 와 같은 DB 에 둔다.
+    url: ${JUSO_DB_URL}
+    username: ${JUSO_DB_USER}
+    password: ${JUSO_DB_PASSWORD}
+    hikari:
+      # 동시에 주문하는 스레드 수(최대 50)보다 넉넉하게. 풀이 모자라면 락이 아니라 풀 대기 시간을 재게 된다.
+      maximum-pool-size: 60
+      # 평소에는 연결 2개만 들고 있다가 실험할 때 늘어난다(기본값은 최대 크기만큼 미리 열어 둔다). DB 가 죽었을 때 5초 안에 오류가 나게 한다.
+      minimum-idle: 2
+      connection-timeout: 5000
+      # 락을 기다리다 영원히 멈추지 않게 한다(실험이 꼬여도 5초 뒤 오류로 끝난다). 기본값 50초는 화면이 멈춘 것처럼 보인다.
+      connection-init-sql: SET SESSION innodb_lock_wait_timeout = 5
+  sql:
+    init:
+      mode: always   # schema.sql 의 CREATE TABLE IF NOT EXISTS 를 시작할 때마다 실행(있으면 그대로 둔다)
