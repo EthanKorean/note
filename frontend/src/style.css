@@ -112,7 +112,11 @@ main { min-width: 0; padding: 24px 24px 64px; }
 .side { background: var(--surface); border-right: 1px solid var(--border); padding: 16px 10px; display: flex; flex-direction: column; gap: 14px; position: sticky; top: 0; height: 100vh; box-sizing: border-box; }
 .brand { font-size: 1.25rem; font-weight: 700; color: var(--text); text-decoration: none; padding: 4px 10px 8px; }
 .group { display: flex; flex-direction: column; gap: 2px; }
-.group-title { font-size: 1rem; letter-spacing: 0.06em; color: var(--muted); padding: 0 10px 4px; }
+.group-title { display: flex; justify-content: space-between; align-items: center; width: 100%; font: inherit; font-size: 1rem; font-weight: 600; letter-spacing: 0.06em; color: var(--muted); background: none; border: 0; border-radius: 6px; padding: 6px 10px; cursor: pointer; text-align: left; }
+.group-title:hover { background: var(--tag-bg); }
+.group-title:focus-visible { outline: 2px solid var(--accent); outline-offset: 1px; }
+.group-items { display: flex; flex-direction: column; gap: 2px; }
+.item.sub { margin-left: 10px; padding-left: 14px; border-left: 1px solid var(--border); border-radius: 0 6px 6px 0; }
 .item { display: flex; justify-content: space-between; align-items: center; gap: 6px; padding: 7px 10px; border-radius: 6px; color: var(--text); text-decoration: none; font-size: 1rem; }
 a.item:hover { background: var(--tag-bg); }
 a.item.on { background: var(--tag-bg); color: var(--accent); font-weight: 600; }
@@ -128,6 +132,8 @@ a.item:focus-visible { outline: 2px solid var(--accent); outline-offset: 1px; }
   .side { position: static; height: auto; flex-direction: row; flex-wrap: wrap; align-items: center; border-right: 0; border-bottom: 1px solid var(--border); gap: 8px 14px; }
   .group-title { display: none; }
   .group { flex-direction: row; flex-wrap: wrap; }
+  .group-items { display: flex !important; flex-direction: row; flex-wrap: wrap; } /* 좁은 화면에서는 접지 않는다 */
+  .item.sub { margin-left: 0; border-left: 0; padding-left: 10px; border-radius: 6px; }
   .notify-opt { margin-top: 0; }
 }
 
